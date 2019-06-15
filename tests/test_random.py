@@ -1,8 +1,7 @@
-import pytest
-
 import numpy as np
 
 from tictac import random
+
 
 def test_get_random_valid_move():
     board = np.array([0,-1,0,0,-1,0,1,0,1])
