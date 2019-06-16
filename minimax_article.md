@@ -46,7 +46,7 @@ def get_move_value_pairs(board):
     return move_value_pairs
 ```
 
-`get_position_value`, below, either obtains the value of the current position from a cache, or calculates it directly by exploring the game tree. Without caching, playing even a single game takes about 1.5 minutes on my computer. Caching takes that down to about 0.3 seconds! A full search will encounter the same position over again many times. Caching allows us to speed this process up considerably: If we've seen this position before, we don't need to re-explore that part of the game tree.
+`get_position_value`, below, either obtains the value of the current position from a cache, or calculates it directly by exploring the game tree. Without caching, playing a single game takes about 1.5 minutes on my computer. Caching takes that down to about 0.3 seconds! A full search will encounter the same position over again many times. Caching allows us to speed this process up considerably: If we've seen a position before, we don't need to re-explore that part of the game tree.
 
 ```python
 def get_position_value(board):
