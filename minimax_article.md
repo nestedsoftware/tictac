@@ -112,7 +112,7 @@ If you're interested in having a closer look, the github repo for this project i
 
 Below are the winning percentages for the different combinations of minimax and random players, with 1000 games played for each combination:
 
-![winning percentages](https://thepracticaldev.s3.amazonaws.com/i/xqro5jfpri5nq8bn66py.png)
+![winning percentages](https://thepracticaldev.s3.amazonaws.com/i/7jme6nri5hpakxhhr5j7.png)
 
 We can see that if both players play perfectly, only a draw is possible, but _X_ is more likely to win if both players play at random.
 
