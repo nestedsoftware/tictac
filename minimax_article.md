@@ -46,13 +46,10 @@ def get_move_value_pairs(board):
     return move_value_pairs
 ```
 
-`get_position_value`, below, either obtains the value of the current position from a cache, or calculates it directly by exploring the game tree. Without caching, playing even a single game takes about 1.5 minutes on my computer. Caching takes that down to about 0.5 seconds! A full search will encounter the same position over again many times. Caching allows us to speed this process up considerably: If we've seen this position before, we don't need to re-explore that part of the game tree.
+`get_position_value`, below, either obtains the value of the current position from a cache, or calculates it directly by exploring the game tree. Without caching, playing even a single game takes about 1.5 minutes on my computer. Caching takes that down to about 0.3 seconds! A full search will encounter the same position over again many times. Caching allows us to speed this process up considerably: If we've seen this position before, we don't need to re-explore that part of the game tree.
 
 ```python
 def get_position_value(board):
-    if is_gameover(board):
-        return get_game_result(board)
-
     cached_position_value, found = get_position_value_from_cache(board)
     if found:
         return cached_position_value
@@ -64,7 +61,7 @@ def get_position_value(board):
     return position_value
 ```
 
-The caching code also takes into account positions that are equivalent. That includes rotations as well as horizontal and vertical reflections. There are 4 equivalent positions under rotation - 0°, 90°, 180°, and 270°. There are also 4 reflections - flipping the original position horizontally and vertically, and also rotating by 90° first, then flipping horizontally and vertically. Flipping the remaining rotations is redundant:  Flipping the 180° rotation will produce the same positions as flipping the original position. Flipping the 270° rotation will produce the same positions as flipping the 90° rotation. Without taking into account rotation and reflection, a single game takes approximately 2 seconds, compared to the 0.5 seconds with caching enabled for rotations and reflections as well. `get_symmetrical_board_orientations` obtains all of the equivalent board positions:
+The caching code also takes into account positions that are equivalent. That includes rotations as well as horizontal and vertical reflections. There are 4 equivalent positions under rotation: 0°, 90°, 180°, and 270°. There are also 4 reflections: Flipping the original position horizontally and vertically, and also rotating by 90° first, then flipping horizontally and vertically. Flipping the remaining rotations is redundant:  Flipping the 180° rotation will produce the same positions as flipping the original position; flipping the 270° rotation will produce the same positions as flipping the 90° rotation. Without taking into account rotation and reflection, a single game takes approximately 0.8 seconds on my computer, compared to the 0.3 seconds when caching is enabled for rotations and reflections as well. `get_symmetrical_board_orientations` obtains all of the equivalent board positions:
 
 ```python
 def get_symmetrical_board_orientations(board_2d):
@@ -84,10 +81,13 @@ def get_symmetrical_board_orientations(board_2d):
     return orientations
 ```
 
-`calculate_position_value` finds the value for a given board. We recursively call back into `get_position_value` with each of the valid possible moves. Then we either get the minimum or the maximum of all of those values, depending on who's turn it is:
+`calculate_position_value` finds the value for a given board. If we're at the end of a game, we return the game result as the value for the position. Otherwise, we recursively call back into `get_position_value` with each of the valid possible moves. Then we either get the minimum or the maximum of all of those values, depending on who's turn it is:
 
 ```python
 def calculate_position_value(board):
+    if is_gameover(board):
+        return get_game_result(board)
+
     valid_move_indexes = get_valid_move_indexes(board)
 
     values = [get_position_value(play_move(board, m))
