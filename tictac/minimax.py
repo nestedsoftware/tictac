@@ -33,9 +33,6 @@ def get_move_value_pairs(board):
 
 
 def get_position_value(board):
-    if is_gameover(board):
-        return get_game_result(board)
-
     cached_position_value, found = get_position_value_from_cache(board)
     if found:
         return cached_position_value
@@ -48,6 +45,9 @@ def get_position_value(board):
 
 
 def calculate_position_value(board):
+    if is_gameover(board):
+        return get_game_result(board)
+
     valid_move_indexes = get_valid_move_indexes(board)
 
     values = [get_position_value(play_move(board, m))
