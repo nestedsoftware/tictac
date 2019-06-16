@@ -61,27 +61,7 @@ def get_position_value(board):
     return position_value
 ```
 
-The caching code also takes into account positions that are equivalent. That includes rotations as well as horizontal and vertical reflections. There are 4 equivalent positions under rotation: 0°, 90°, 180°, and 270°. There are also 4 reflections: Flipping the original position horizontally and vertically, and also rotating by 90° first, then flipping horizontally and vertically. Flipping the remaining rotations is redundant:  Flipping the 180° rotation will produce the same positions as flipping the original position; flipping the 270° rotation will produce the same positions as flipping the 90° rotation. Without taking into account rotation and reflection, a single game takes approximately 0.8 seconds on my computer, compared to the 0.3 seconds when caching is enabled for rotations and reflections as well. `get_symmetrical_board_orientations` obtains all of the equivalent board positions:
-
-```python
-def get_symmetrical_board_orientations(board_2d):
-    orientations = [board_2d]
-
-    current_board_2d = board_2d
-    for i in range(3):
-        current_board_2d = np.rot90(current_board_2d)
-        orientations.append(current_board_2d)
-
-    orientations.append(np.flipud(board_2d))
-    orientations.append(np.fliplr(board_2d))
-
-    orientations.append(np.flipud(np.rot90(board_2d)))
-    orientations.append(np.fliplr(np.rot90(board_2d)))
-
-    return orientations
-```
-
-`calculate_position_value` finds the value for a given board. If we're at the end of a game, we return the game result as the value for the position. Otherwise, we recursively call back into `get_position_value` with each of the valid possible moves. Then we either get the minimum or the maximum of all of those values, depending on who's turn it is:
+`calculate_position_value` finds the value for a given board when it is not already in the cache. If we're at the end of a game, we return the game result as the value for the position. Otherwise, we recursively call back into `get_position_value` with each of the valid possible moves. Then we either get the minimum or the maximum of all of those values, depending on who's turn it is:
 
 ```python
 def calculate_position_value(board):
@@ -106,7 +86,28 @@ def choose_min_or_max_for_comparison(board):
     turn = get_turn(board)
     return min if turn == CELL_O else max
 ```
-If you're interested in having a closer look, the github repo for this project is available at:
+
+Going back to caching for a moment, the caching code also takes into account positions that are equivalent. That includes rotations as well as horizontal and vertical reflections. There are 4 equivalent positions under rotation: 0°, 90°, 180°, and 270°. There are also 4 reflections: Flipping the original position horizontally and vertically, and also rotating by 90° first, then flipping horizontally and vertically. Flipping the remaining rotations is redundant:  Flipping the 180° rotation will produce the same positions as flipping the original position; flipping the 270° rotation will produce the same positions as flipping the 90° rotation. Without taking into account rotation and reflection, a single game takes approximately 0.8 seconds on my computer, compared to the 0.3 seconds when caching is also enabled for rotations and reflections. `get_symmetrical_board_orientations` obtains all of the equivalent board positions so they can be looked up in the cache:
+
+```python
+def get_symmetrical_board_orientations(board_2d):
+    orientations = [board_2d]
+
+    current_board_2d = board_2d
+    for i in range(3):
+        current_board_2d = np.rot90(current_board_2d)
+        orientations.append(current_board_2d)
+
+    orientations.append(np.flipud(board_2d))
+    orientations.append(np.fliplr(board_2d))
+
+    orientations.append(np.flipud(np.rot90(board_2d)))
+    orientations.append(np.fliplr(np.rot90(board_2d)))
+
+    return orientations
+```
+
+If you're interested in having a closer look, the github repo with all of the code for this project is available at:
 
 {% github nestedsoftware/tictac %}
 
