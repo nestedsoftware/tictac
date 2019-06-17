@@ -14,13 +14,13 @@ RESULT_DRAW = 0
 RESULT_NOT_OVER = 2
 
 
-def play_games(number_of_games, x_strategy, o_strategy):
+def play_games(total_games, x_strategy, o_strategy):
     results = {
         RESULT_X_WINS: 0,
         RESULT_O_WINS: 0,
         RESULT_DRAW: 0
     }
-    total_games = number_of_games
+
     board = np.array([CELL_EMPTY] * BOARD_SIZE**2)
 
     for g in range(total_games):
