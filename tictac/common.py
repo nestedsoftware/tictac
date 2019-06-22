@@ -135,3 +135,20 @@ def get_board_2d(board):
 
 def not_empty(items):
     return items is not None and len(items) > 0
+
+
+def get_symmetrical_board_orientations(board_2d):
+    orientations = [board_2d]
+
+    current_board_2d = board_2d
+    for i in range(3):
+        current_board_2d = np.rot90(current_board_2d)
+        orientations.append(current_board_2d)
+
+    orientations.append(np.flipud(board_2d))
+    orientations.append(np.fliplr(board_2d))
+
+    orientations.append(np.flipud(np.rot90(board_2d)))
+    orientations.append(np.fliplr(np.rot90(board_2d)))
+
+    return orientations

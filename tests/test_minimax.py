@@ -7,7 +7,7 @@ from tictac import common, minimax
 
 @pytest.fixture(autouse=True)
 def reset_cache():
-    minimax.reset_cache()
+    minimax.cache.reset()
 
 
 def test_get_position_value_x_wins():
@@ -97,7 +97,7 @@ def test_get_orientations():
                          [1, -1,  1],
                          [0,  0, -1]])
 
-    orientations = minimax.get_symmetrical_board_orientations(board_2d)
+    orientations = common.get_symmetrical_board_orientations(board_2d)
 
     board_rot90 = np.array([[0,  1, -1],
                             [0, -1,  0],
@@ -140,12 +140,12 @@ def test_get_position_value_from_cache():
                       [1, -1,  1],
                       [0,  0, -1]]).reshape(1, 9)[0]
 
-    value, found = minimax.get_position_value_from_cache(board)
+    value, found = minimax.cache.get_for_position(board)
 
     assert (value, found) == (None, False)
 
-    minimax.put_position_value_in_cache(board, -1)
+    minimax.cache.set_for_position(board, -1)
 
-    value, found = minimax.get_position_value_from_cache(board)
+    value, found = minimax.cache.get_for_position(board)
 
     assert (value, found) == (-1, True)
