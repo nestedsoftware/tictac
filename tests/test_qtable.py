@@ -5,7 +5,7 @@ import numpy as np
 import random
 
 from tictac.board_cache import BoardCache
-from tictac.qtable import (get_q_values, get_noisy_q_values, get_action_index)
+from tictac.qtable import (get_q_values, get_noisy_q_values, choose_move)
 
 
 @pytest.fixture(autouse=True)
@@ -102,9 +102,9 @@ def test_get_action_index_choose_1st_move():
     q_table = BoardCache()
     q_table.set_for_position(board, np.array([1, 0.5]))
 
-    action_index = get_action_index(q_table, board, 0)
+    action_index = choose_move(q_table, board, 0)
 
-    assert action_index == 0
+    assert action_index == 1
 
 
 def test_get_action_index_choose_2nd_move():
@@ -115,9 +115,9 @@ def test_get_action_index_choose_2nd_move():
     q_table = BoardCache()
     q_table.set_for_position(board, np.array([0.5, 1]))
 
-    action_index = get_action_index(q_table, board, 0)
+    action_index = choose_move(q_table, board, 0)
 
-    assert action_index == 1
+    assert action_index == 2
 
 
 # def test_train_episode_end_of_game():

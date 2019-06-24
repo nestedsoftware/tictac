@@ -1,5 +1,6 @@
-import numpy as np
 import itertools
+
+import numpy as np
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)

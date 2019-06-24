@@ -1,9 +1,7 @@
+from tictac.board_cache import BoardCache
 from tictac.common import CELL_O
-
 from tictac.common import (get_game_result, is_gameover, play_move,
                            get_valid_move_indexes, get_turn, not_empty)
-
-from tictac.board_cache import BoardCache
 
 cache = BoardCache()
 
