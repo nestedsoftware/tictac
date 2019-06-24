@@ -1,4 +1,5 @@
 import itertools
+import random
 from collections import deque
 
 import numpy as np
@@ -22,28 +23,29 @@ def play_q_table_move(board, q_table=qtable):
 
 
 def play_training_games(total_games=10000, q_table=qtable,
-                        q_table_player=CELL_X, learning_rate=0.9,
-                        discount_factor=0.9, noise_factor=0.0,
+                        q_table_player=CELL_X, learning_rate=0.99,
+                        discount_factor=1.0, epsilon=0,
                         x_strategy=None, o_strategy=play_minimax_move):
     i = 1
     for game in range(total_games):
         move_history = deque()
         x_strategy_set = get_player_strategy(x_strategy, q_table,
-                                             move_history, noise_factor)
+                                             move_history, epsilon)
         o_strategy_set = get_player_strategy(o_strategy, q_table,
-                                             move_history, noise_factor)
+                                             move_history, epsilon)
 
         play_training_game(q_table, move_history, q_table_player,
                            x_strategy_set, o_strategy_set, learning_rate,
                            discount_factor)
         if i % (total_games/10) == 0:
-            print(f"played {i} games...")
+            epsilon = max(0, epsilon - 0.1)
+            print(f"played {i} games, using epsilon={epsilon}...")
         i += 1
 
 
-def get_player_strategy(player_strategy, q_table, move_history, noise_factor):
+def get_player_strategy(player_strategy, q_table, move_history, epsilon):
     if player_strategy is None:
-        return create_play_for_training(q_table, move_history, noise_factor)
+        return create_play_for_training(q_table, move_history, epsilon)
 
     return player_strategy
 
@@ -61,9 +63,9 @@ def play_training_game(q_table, move_history, q_table_player, x_strategy,
                              learning_rate, discount_factor)
 
 
-def create_play_for_training(q_table, move_history, noise_factor):
+def create_play_for_training(q_table, move_history, epsilon):
     def play(board):
-        move_index = choose_move(q_table, board, noise_factor)
+        move_index = choose_move(q_table, board, epsilon)
         move_history.appendleft((board, move_index))
         return play_move(board, move_index)
 
@@ -116,15 +118,20 @@ def is_draw(board):
     return get_game_result(board) == RESULT_DRAW
 
 
-def choose_move(q_table, board, noise_factor):
+def choose_move(q_table, board, epsilon):
     q_values = get_q_values(q_table, board)
-    noisy_q_values = get_noisy_q_values(q_values, noise_factor)
-
-    action_index = np.argmax(noisy_q_values)
-
+    action_index = get_action_index(q_values, epsilon)
     valid_move_indexes = get_valid_move_indexes(board)
 
     return valid_move_indexes[action_index]
+
+
+def get_action_index(q_values, epsilon):
+    random_value_from_0_to_1 = np.random.uniform()
+    if random_value_from_0_to_1 < epsilon:
+        return random.randrange(0, len(q_values))
+
+    return np.argmax(q_values)
 
 
 def set_q_value(q_table, board, move_index, q_value):
@@ -144,9 +151,3 @@ def get_q_values(q_table, board):
         q_table.set_for_position(board, q_values)
 
     return q_values
-
-
-def get_noisy_q_values(q_values, noise_rate):
-    noise = np.random.randn(len(q_values)) * noise_rate
-
-    return q_values + noise
