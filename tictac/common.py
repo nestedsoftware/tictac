@@ -22,10 +22,8 @@ def play_games(total_games, x_strategy, o_strategy):
         RESULT_DRAW: 0
     }
 
-    board = np.array([CELL_EMPTY] * BOARD_SIZE**2)
-
     for g in range(total_games):
-        result = play_game(board, x_strategy, o_strategy)
+        result = get_game_result(play_game(x_strategy, o_strategy))
         results[result] += 1
 
     x_wins_percent = results[RESULT_X_WINS] / total_games * 100
@@ -37,14 +35,15 @@ def play_games(total_games, x_strategy, o_strategy):
     print(f"draw  : {draw_percent:.2f}%")
 
 
-def play_game(board, x_strategy, o_strategy):
+def play_game(x_strategy, o_strategy):
+    board = np.array([CELL_EMPTY] * BOARD_SIZE**2)
     player_strategies = itertools.cycle([x_strategy, o_strategy])
 
     while not is_gameover(board):
         play = next(player_strategies)
         board = play(board)
 
-    return get_game_result(board)
+    return board
 
 
 def get_game_result(board):
@@ -107,7 +106,7 @@ def print_board(board):
 def get_board_as_string(board):
     board2d = board.reshape(BOARD_DIMENSIONS)
     rows, cols = board2d.shape
-    board_as_string = ("-------\n")
+    board_as_string = "-------\n"
     for r in range(rows):
         for c in range(cols):
             move = get_symbol(board2d[r, c])
@@ -117,7 +116,7 @@ def get_board_as_string(board):
                 board_as_string += f"{move}|"
             else:
                 board_as_string += f"{move}|\n"
-    board_as_string += ("-------\n")
+    board_as_string += "-------\n"
 
     return board_as_string
 

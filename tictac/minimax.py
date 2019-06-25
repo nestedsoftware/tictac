@@ -1,3 +1,5 @@
+import random
+
 from tictac.board_cache import BoardCache
 from tictac.common import CELL_O
 from tictac.common import (get_game_result, is_gameover, play_move,
@@ -53,7 +55,9 @@ def calculate_position_value(board):
 
 def filter_best_move(board, move_value_pairs):
     min_or_max = choose_min_or_max_for_comparison(board)
-    move, value = min_or_max(move_value_pairs, key=lambda mvp: mvp[1])
+
+    move, _ = min_or_max(move_value_pairs, key=lambda mvp: mvp[1])
+
     return move
 
 
