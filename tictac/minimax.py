@@ -8,9 +8,16 @@ from tictac.common import (get_game_result, is_gameover, play_move,
 cache = BoardCache()
 
 
-def play_minimax_move(board):
+def create_minimax_player(randomize):
+    def play(board):
+        return play_minimax_move(board, randomize)
+
+    return play
+
+
+def play_minimax_move(board, randomize=False):
     move_value_pairs = get_move_value_pairs(board)
-    move = filter_best_move(board, move_value_pairs)
+    move = filter_best_move(board, move_value_pairs, randomize)
 
     return play_move(board, move)
 
@@ -53,10 +60,15 @@ def calculate_position_value(board):
     return position_value
 
 
-def filter_best_move(board, move_value_pairs):
+def filter_best_move(board, move_value_pairs, randomize):
     min_or_max = choose_min_or_max_for_comparison(board)
+    move, value = min_or_max(move_value_pairs, key=lambda mvp: mvp[1])
 
-    move, _ = min_or_max(move_value_pairs, key=lambda mvp: mvp[1])
+    if randomize:
+        best_move_value_pairs = [mvp for mvp in move_value_pairs
+                                 if mvp[1] == value]
+        chosen_move, _ = random.choice(best_move_value_pairs)
+        return chosen_move
 
     return move
 

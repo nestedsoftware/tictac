@@ -8,7 +8,7 @@ from tictac.common import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS,
                            RESULT_DRAW)
 from tictac.common import (play_game, get_turn, play_move, get_game_result,
                            get_valid_move_indexes)
-from tictac.minimax import play_minimax_move
+from tictac.minimax import create_minimax_player
 
 qtable = BoardCache()
 
@@ -19,6 +19,8 @@ LOSS_VALUE = 0.0
 INITIAL_Q_VALUES_FOR_X = 0.01
 INITIAL_Q_VALUES_FOR_O = 0.01
 
+play_minimax_move_not_randomized = create_minimax_player(False)
+
 
 def play_q_table_move(board, q_table=qtable):
     move_index = choose_move(q_table, board, 0)
@@ -27,31 +29,28 @@ def play_q_table_move(board, q_table=qtable):
 
 def play_training_games_x(total_games=10000, q_table=qtable,
                           learning_rate=0.9, discount_factor=1.0, epsilon=0,
-                          o_strategy=[play_minimax_move]):
+                          o_strategies=[play_minimax_move_not_randomized]):
     play_training_games(total_games, q_table, CELL_X, learning_rate,
-                        discount_factor, epsilon, None, o_strategy)
+                        discount_factor, epsilon, None, o_strategies)
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=1.0, epsilon=0,
-                          x_strategy=[play_minimax_move]):
+                          learning_rate=0.1, discount_factor=1.0, epsilon=0,
+                          x_strategies=[play_minimax_move_not_randomized]):
     play_training_games(total_games, q_table, CELL_O, learning_rate,
-                        discount_factor, epsilon, x_strategy, None)
+                        discount_factor, epsilon, x_strategies, None)
 
 
 def play_training_games(total_games, q_table, q_table_player, learning_rate,
-                        discount_factor, epsilon, x_strategy, o_strategy):
+                        discount_factor, epsilon, x_strategies, o_strategies):
     for game in range(total_games):
         move_history = deque()
-        x_strategy_set = get_strategy(x_strategy, q_table, move_history, epsilon)
+        strategies = get_strategies_to_use(q_table, move_history,
+                                           x_strategies, o_strategies,
+                                           epsilon)
 
-        o_strategy_set = get_strategy(o_strategy, q_table, move_history, epsilon)
-
-        x_strategy_set = itertools.cycle(x_strategy_set)
-        o_strategy_set = itertools.cycle(o_strategy_set)
-
-        x_strategy_to_use = next(x_strategy_set)
-        o_strategy_to_use = next(o_strategy_set)
+        x_strategy_to_use = next(strategies[0])
+        o_strategy_to_use = next(strategies[1])
 
         play_training_game(q_table, move_history, q_table_player,
                            x_strategy_to_use, o_strategy_to_use,
@@ -60,6 +59,22 @@ def play_training_games(total_games, q_table, q_table_player, learning_rate,
         if (game+1) % (total_games / 10) == 0:
             epsilon = max(0, epsilon - 0.1)
             print(f"played {game+1} games, using epsilon={epsilon}...")
+
+
+def get_strategies_to_use(q_table,  move_history, x_strategies, o_strategies,
+                          epsilon):
+    x_strategies = get_strategies(x_strategies, q_table, move_history,
+                                  epsilon)
+    o_strategies = get_strategies(o_strategies, q_table, move_history,
+                                  epsilon)
+    x_strategies_to_use = itertools.cycle(x_strategies)
+    o_strategies_to_use = itertools.cycle(o_strategies)
+    return x_strategies_to_use, o_strategies_to_use
+
+
+def get_strategies(strategy, q_table, move_history, epsilon):
+    return ([create_play_for_training(q_table, move_history, epsilon)]
+            if strategy is None else strategy)
 
 
 def play_training_game(q_table, move_history, q_table_player, x_strategy,
@@ -138,11 +153,6 @@ def get_q_values(q_table, board):
         q_table.set_for_position(board, q_values)
 
     return q_values
-
-
-def get_strategy(strategy, q_table, move_history, epsilon):
-    return ([create_play_for_training(q_table, move_history, epsilon)]
-            if strategy is None else strategy)
 
 
 def get_game_result_value(player, board):
