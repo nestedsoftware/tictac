@@ -1,16 +1,13 @@
+import numpy as np
+import operator
 import itertools
-import random
 from collections import deque
 
-import numpy as np
-from tictac.board_cache import BoardCache
-from tictac.common import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS,
-                           RESULT_DRAW)
-from tictac.common import (play_game, get_turn, play_move, get_game_result,
-                           get_valid_move_indexes)
+from tictac.board import BoardCache
+from tictac.board import play_game
+from tictac.board import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS,
+                          RESULT_DRAW)
 from tictac.minimax import create_minimax_player
-
-qtable = BoardCache()
 
 WIN_VALUE = 1.0
 DRAW_VALUE = 0.5
@@ -22,21 +19,68 @@ INITIAL_Q_VALUES_FOR_O = 0.01
 play_minimax_move_not_randomized = create_minimax_player(False)
 
 
+class QTable:
+    def __init__(self):
+        self.qtable = BoardCache()
+
+    def get_q_values(self, board):
+        qvalues, found = self.qtable.get_for_position(board)
+        if found:
+            return qvalues
+
+        valid_move_indexes = board.get_valid_move_indexes()
+        initial_q_value = get_initial_q_value(board)
+        initial_q_values = [initial_q_value for i in valid_move_indexes]
+        qvalues = dict(zip(valid_move_indexes, initial_q_values))
+        self.qtable.set_for_position(board, qvalues)
+
+        return qvalues
+
+    def update_q_value(self, board, move_index, qvalue):
+        qvalues = self.get_q_values(board)
+        qvalues[move_index] = qvalue
+
+    def get_move_index_and_max_q_value(self, board):
+        q_values = self.get_q_values(board)
+        return max(q_values.items(), key=operator.itemgetter(1))
+
+
+def get_initial_q_value(board):
+    return (INITIAL_Q_VALUES_FOR_X if board.get_turn() == CELL_X
+            else INITIAL_Q_VALUES_FOR_O)
+
+
+qtable = QTable()
+
+
 def play_q_table_move(board, q_table=qtable):
-    move_index = choose_move(q_table, board, 0)
-    return play_move(board, move_index)
+    move = choose_move_index(q_table, board, 0)
+    return board.play_move(move)
+
+
+def choose_move_index(q_table, board, epsilon):
+    if epsilon:
+        random_value_from_0_to_1 = np.random.uniform()
+        if random_value_from_0_to_1 < epsilon:
+            return board.get_random_valid_move_index()
+
+    return q_table.get_move_index_and_max_q_value(board)[0]
 
 
 def play_training_games_x(total_games=10000, q_table=qtable,
                           learning_rate=0.9, discount_factor=1.0, epsilon=0,
-                          o_strategies=[play_minimax_move_not_randomized]):
+                          o_strategies=None):
+    if not o_strategies:
+        o_strategies = [play_minimax_move_not_randomized]
     play_training_games(total_games, q_table, CELL_X, learning_rate,
                         discount_factor, epsilon, None, o_strategies)
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
                           learning_rate=0.1, discount_factor=1.0, epsilon=0,
-                          x_strategies=[play_minimax_move_not_randomized]):
+                          x_strategies=None):
+    if not x_strategies:
+        x_strategies = [play_minimax_move_not_randomized]
     play_training_games(total_games, q_table, CELL_O, learning_rate,
                         discount_factor, epsilon, x_strategies, None)
 
@@ -89,70 +133,25 @@ def update_training_gameover(q_table, move_history, q_table_player, board,
                              learning_rate, discount_factor):
     new_q_value = get_game_result_value(q_table_player, board)
     final_position, final_move = move_history[0]
-    set_q_value(q_table, final_position, final_move, new_q_value)
-
-    updated_q_values = get_q_values(q_table, final_position)
-    max_q_value = max(updated_q_values)
+    q_table.update_q_value(final_position, final_move, new_q_value)
+    max_q_value = q_table.get_move_index_and_max_q_value(final_position)[1]
 
     for (position, move_index) in list(move_history)[1:]:
-        q_values = get_q_values(q_table, position)
-        q_value_index = get_valid_move_indexes(position).index(move_index)
-        q_value = q_values[q_value_index]
+        q_values = q_table.get_q_values(position)
+        q_value = q_values[move_index]
         new_q_value = ((1 - learning_rate) * q_value
                        + learning_rate * discount_factor * max_q_value)
-        set_q_value(q_table, position, move_index, new_q_value)
-
-        updated_q_values = get_q_values(q_table, position)
-        max_q_value = max(updated_q_values)
+        q_table.update_q_value(position, move_index, new_q_value)
+        max_q_value = q_table.get_move_index_and_max_q_value(position)[1]
 
 
 def create_play_for_training(q_table, move_history, epsilon):
     def play(board):
-        move_index = choose_move(q_table, board, epsilon)
+        move_index = choose_move_index(q_table, board, epsilon)
         move_history.appendleft((board, move_index))
-        return play_move(board, move_index)
+        return board.play_move(move_index)
 
     return play
-
-
-def choose_move(q_table, board, epsilon):
-    q_values = get_q_values(q_table, board)
-    action_index = choose_action_index(q_values, epsilon)
-    valid_move_indexes = get_valid_move_indexes(board)
-
-    return valid_move_indexes[action_index]
-
-
-def choose_action_index(q_values, epsilon):
-    random_value_from_0_to_1 = np.random.uniform()
-    if random_value_from_0_to_1 < epsilon:
-        return random.randrange(0, len(q_values))
-
-    max_q_value_index = np.argmax(q_values)
-    return max_q_value_index
-
-
-def set_q_value(q_table, board, move_index, q_value):
-    q_values, found = q_table.get_for_position(board)
-    assert found, "position should already be cached"
-    q_table_index = get_valid_move_indexes(board).index(move_index)
-
-    q_values[q_table_index] = q_value
-    q_table.set_for_position(board, q_values)
-
-
-def get_q_values(q_table, board):
-    q_values, found = q_table.get_for_position(board)
-    if not found:
-        initial_q_values = (INITIAL_Q_VALUES_FOR_X
-                            if get_turn(board) == CELL_X
-                            else INITIAL_Q_VALUES_FOR_O)
-
-        valid_move_indexes = get_valid_move_indexes(board)
-        q_values = np.full(len(valid_move_indexes), initial_q_values)
-        q_table.set_for_position(board, q_values)
-
-    return q_values
 
 
 def get_game_result_value(player, board):
@@ -165,16 +164,16 @@ def get_game_result_value(player, board):
 
 
 def is_win(player, board):
-    result = get_game_result(board)
+    result = board.get_game_result()
     return ((player == CELL_O and result == RESULT_O_WINS)
             or (player == CELL_X and result == RESULT_X_WINS))
 
 
 def is_loss(player, board):
-    result = get_game_result(board)
+    result = board.get_game_result()
     return ((player == CELL_O and result == RESULT_X_WINS)
             or (player == CELL_X and result == RESULT_O_WINS))
 
 
 def is_draw(board):
-    return get_game_result(board) == RESULT_DRAW
+    return board.get_game_result() == RESULT_DRAW

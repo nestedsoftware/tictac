@@ -2,102 +2,105 @@ import pytest
 
 import numpy as np
 
-from tictac import common, minimax
+from tictac.minimax import cache
+from tictac.minimax import (get_position_value, get_move_value_pairs,
+                            play_minimax_move)
+from tictac.board import Board
+from tictac.board import RESULT_X_WINS, RESULT_O_WINS, RESULT_DRAW
+from tictac.board import get_symmetrical_board_orientations
 
 
 @pytest.fixture(autouse=True)
 def reset_cache():
-    minimax.cache.reset()
+    cache.reset()
 
 
 def test_get_position_value_x_wins():
-    board = np.array([[1, 0, -1],
-                      [1, 0, -1],
-                      [1, 0,  0]]).reshape(1, 9)[0]
+    b = np.array([[1, 0, -1],
+                  [1, 0, -1],
+                  [1, 0,  0]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_X_WINS
+    assert value == RESULT_X_WINS
 
 
 def test_get_position_value_o_wins():
-    board = np.array([[1, 0, -1],
-                      [1, 0, -1],
-                      [0, 1, -1]]).reshape(1, 9)[0]
+    b = np.array([[1, 0, -1],
+                  [1, 0, -1],
+                  [0, 1, -1]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_O_WINS
+    assert value == RESULT_O_WINS
 
 
 def test_get_position_value_draw():
-    board = np.array([[ 1, -1,  1],
-                      [ 1,  1, -1],
-                      [-1,  1, -1]]).reshape(1, 9)[0]
+    b = np.array([[ 1, -1,  1],
+                  [ 1,  1, -1],
+                  [-1,  1, -1]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_DRAW
+    assert value == RESULT_DRAW
 
 
 def test_get_position_value_draw_is_best_case():
-    board = np.array([[ 1, -1,  0],
-                      [ 1,  1, -1],
-                      [-1,  1, -1]]).reshape(1, 9)[0]
+    b = np.array([[ 1, -1,  0],
+                  [ 1,  1, -1],
+                  [-1,  1, -1]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_DRAW
+    assert value == RESULT_DRAW
 
 
 def test_get_position_value_o_wins_in_best_case_x_turn():
-    board = np.array([[ 1,  0,  0],
-                      [ 1, -1,  1],
-                      [-1,  0, -1]]).reshape(1, 9)[0]
+    b = np.array([[ 1,  0,  0],
+                  [ 1, -1,  1],
+                  [-1,  0, -1]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_O_WINS
+    assert value == RESULT_O_WINS
 
 
 def test_get_position_value_o_wins_in_best_case_o_turn():
-    board = np.array([[1,  0,  0],
-                      [1, -1,  1],
-                      [0,  0, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [0,  0, -1]]).reshape(1, 9)[0]
 
-    value = minimax.get_position_value(board)
+    value = get_position_value(Board(b))
 
-    assert value == common.RESULT_O_WINS
+    assert value == RESULT_O_WINS
 
 
 def test_get_move_value_pairs_for_position_o_wins_in_best_case():
-    board = np.array([[1,  0,  0],
-                      [1, -1,  1],
-                      [0,  0, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [0,  0, -1]]).reshape(1, 9)[0]
 
-    move_value_pairs = minimax.get_move_value_pairs(board)
+    move_value_pairs = get_move_value_pairs(Board(b))
 
     assert move_value_pairs == [(1, 1), (2, 1), (6, -1), (7, 1)]
 
 
 def test_play_minimax_move_o_wins_in_best_case():
-    board = np.array([[1,  0,  0],
-                      [1, -1,  1],
-                      [0,  0, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [0,  0, -1]]).reshape(1, 9)[0]
 
-    board = minimax.play_minimax_move(board)
+    result = play_minimax_move(Board(b)).board
 
-    assert np.array_equal(board, np.array([[ 1,  0,  0],
-                                           [ 1, -1,  1],
-                                           [-1,  0, -1]]).reshape(1, 9)[0])
+    assert np.array_equal(result, np.array([[ 1,  0,  0],
+                                            [ 1, -1,  1],
+                                            [-1,  0, -1]]).reshape(1, 9)[0])
 
 
 def test_get_orientations():
     board_2d = np.array([[1,  0,  0],
                          [1, -1,  1],
                          [0,  0, -1]])
-
-    orientations = common.get_symmetrical_board_orientations(board_2d)
 
     board_rot90 = np.array([[0,  1, -1],
                             [0, -1,  0],
@@ -132,20 +135,22 @@ def test_get_orientations():
                              board_rot90_flip_vertical,
                              board_rot90_flip_horizontal]
 
+    orientations = get_symmetrical_board_orientations(board_2d)
+
     assert np.array_equal(orientations, expected_orientations)
 
 
 def test_get_position_value_from_cache():
-    board = np.array([[1,  0,  0],
-                      [1, -1,  1],
-                      [0,  0, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [0,  0, -1]]).reshape(1, 9)[0]
 
-    value, found = minimax.cache.get_for_position(board)
+    value, found = cache.get_for_position(Board(b))
 
     assert (value, found) == (None, False)
 
-    minimax.cache.set_for_position(board, -1)
+    cache.set_for_position(Board(b), -1)
 
-    value, found = minimax.cache.get_for_position(board)
+    value, found = cache.get_for_position(Board(b))
 
     assert (value, found) == (-1, True)

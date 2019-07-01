@@ -1,9 +1,8 @@
 import random
 
-from tictac.board_cache import BoardCache
-from tictac.common import CELL_O
-from tictac.common import (get_game_result, is_gameover, play_move,
-                           get_valid_move_indexes, get_turn, not_empty)
+from tictac.board import BoardCache
+from tictac.board import CELL_O
+from tictac.board import is_empty
 
 cache = BoardCache()
 
@@ -19,15 +18,15 @@ def play_minimax_move(board, randomize=False):
     move_value_pairs = get_move_value_pairs(board)
     move = filter_best_move(board, move_value_pairs, randomize)
 
-    return play_move(board, move)
+    return board.play_move(move)
 
 
 def get_move_value_pairs(board):
-    valid_move_indexes = get_valid_move_indexes(board)
+    valid_move_indexes = board.get_valid_move_indexes()
 
-    assert not_empty(valid_move_indexes), "never call with an end-position"
+    assert not is_empty(valid_move_indexes), "never call with an end position"
 
-    move_value_pairs = [(m, get_position_value(play_move(board, m)))
+    move_value_pairs = [(m, get_position_value(board.play_move(m)))
                         for m in valid_move_indexes]
 
     return move_value_pairs
@@ -46,12 +45,12 @@ def get_position_value(board):
 
 
 def calculate_position_value(board):
-    if is_gameover(board):
-        return get_game_result(board)
+    if board.is_gameover():
+        return board.get_game_result()
 
-    valid_move_indexes = get_valid_move_indexes(board)
+    valid_move_indexes = board.get_valid_move_indexes()
 
-    values = [get_position_value(play_move(board, m))
+    values = [get_position_value(board.play_move(m))
               for m in valid_move_indexes]
 
     min_or_max = choose_min_or_max_for_comparison(board)
@@ -63,16 +62,15 @@ def calculate_position_value(board):
 def filter_best_move(board, move_value_pairs, randomize):
     min_or_max = choose_min_or_max_for_comparison(board)
     move, value = min_or_max(move_value_pairs, key=lambda mvp: mvp[1])
+    if not randomize:
+        return move
 
-    if randomize:
-        best_move_value_pairs = [mvp for mvp in move_value_pairs
-                                 if mvp[1] == value]
-        chosen_move, _ = random.choice(best_move_value_pairs)
-        return chosen_move
-
-    return move
+    best_move_value_pairs = [mvp for mvp in move_value_pairs
+                             if mvp[1] == value]
+    chosen_move, _ = random.choice(best_move_value_pairs)
+    return chosen_move
 
 
 def choose_min_or_max_for_comparison(board):
-    turn = get_turn(board)
+    turn = board.get_turn()
     return min if turn == CELL_O else max
