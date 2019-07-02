@@ -41,6 +41,7 @@ class QTable:
     def update_q_value(self, board, move_index, qvalue):
         qvalues = self.get_q_values(board)
         qvalues[move_index] = qvalue
+        self.qtable.set_for_position(board, qvalues)
 
     def get_move_index_and_max_q_value(self, board):
         q_values = self.get_q_values(board)
