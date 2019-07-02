@@ -16,6 +16,14 @@ class Transform:
         return target
 
 
+class Identity:
+    def transform(self, matrix2d):
+        return matrix2d
+
+    def reverse(self, matrix2d):
+        return matrix2d
+
+
 class Rotate:
     def __init__(self, number_of_rotations):
         self.number_of_rotations = number_of_rotations

@@ -2,6 +2,13 @@ import random
 import itertools
 import numpy as np
 
+
+from tictac.transform import Transform, Identity, Rotate, Flip
+
+transformations = [Identity(), Rotate(1), Rotate(2), Rotate(3), Flip(np.flipud),
+                   Flip(np.fliplr), Transform([Rotate(1), Flip(np.flipud)]),
+                   Transform([Rotate(1), Flip(np.fliplr)])]
+
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
 
@@ -132,34 +139,17 @@ class BoardCache:
 
     def get_for_position(self, board):
         board_2d = board.board_2d
-        board_orientations = get_symmetrical_board_orientations(board_2d)
 
-        for b2d in board_orientations:
-            result = self.cache.get(b2d.tobytes())
+        for t in transformations:
+            transformed_board_2d = t.transform(board_2d)
+            result = self.cache.get(transformed_board_2d.tobytes())
             if result is not None:
-                return result, True
+                return (result, t), True
 
         return None, False
 
     def reset(self):
         self.cache = {}
-
-
-def get_symmetrical_board_orientations(board_2d):
-    orientations = [board_2d]
-
-    current_board_2d = board_2d
-    for i in range(3):
-        current_board_2d = np.rot90(current_board_2d)
-        orientations.append(current_board_2d)
-
-    orientations.append(np.flipud(board_2d))
-    orientations.append(np.fliplr(board_2d))
-
-    orientations.append(np.flipud(np.rot90(board_2d)))
-    orientations.append(np.fliplr(np.rot90(board_2d)))
-
-    return orientations
 
 
 def get_rows_cols_and_diagonals(board_2d):

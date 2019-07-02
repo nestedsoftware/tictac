@@ -5,8 +5,9 @@ from collections import deque
 
 from tictac.board import BoardCache
 from tictac.board import play_game
-from tictac.board import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS,
-                          RESULT_DRAW)
+from tictac.board import (BOARD_DIMENSIONS, CELL_X, CELL_O, RESULT_X_WINS,
+                          RESULT_O_WINS, RESULT_DRAW)
+
 from tictac.minimax import create_minimax_player
 
 WIN_VALUE = 1.0
@@ -24,14 +25,15 @@ class QTable:
         self.qtable = BoardCache()
 
     def get_q_values(self, board):
-        qvalues, found = self.qtable.get_for_position(board)
+        (qvalues, t), found = self.qtable.get_for_position(board)
         if found:
-            return qvalues
+            return get_transformed_move_indexes_and_q_values(qvalues, t)
 
         valid_move_indexes = board.get_valid_move_indexes()
         initial_q_value = get_initial_q_value(board)
         initial_q_values = [initial_q_value for i in valid_move_indexes]
         qvalues = dict(zip(valid_move_indexes, initial_q_values))
+
         self.qtable.set_for_position(board, qvalues)
 
         return qvalues
@@ -48,6 +50,18 @@ class QTable:
 def get_initial_q_value(board):
     return (INITIAL_Q_VALUES_FOR_X if board.get_turn() == CELL_X
             else INITIAL_Q_VALUES_FOR_O)
+
+
+def get_transformed_move_indexes_and_q_values(qvalues, t):
+    b = np.empty(BOARD_DIMENSIONS)
+    b[:] = np.nan
+    for k, v in qvalues.items():
+        b[k] = v
+
+    reversed_b = t.reverse(b)
+
+    return dict([(i, v) for i, v in enumerate(reversed_b.flatten())
+                 if not np.isnan(v)])
 
 
 qtable = QTable()

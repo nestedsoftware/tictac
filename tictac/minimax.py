@@ -33,7 +33,7 @@ def get_move_value_pairs(board):
 
 
 def get_position_value(board):
-    cached_position_value, found = cache.get_for_position(board)
+    (cached_position_value, _), found = cache.get_for_position(board)
     if found:
         return cached_position_value
 
