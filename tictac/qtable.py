@@ -14,8 +14,8 @@ WIN_VALUE = 1.0
 DRAW_VALUE = 0.5
 LOSS_VALUE = 0.0
 
-INITIAL_Q_VALUES_FOR_X = 0.01
-INITIAL_Q_VALUES_FOR_O = 0.01
+INITIAL_Q_VALUES_FOR_X = 0.5
+INITIAL_Q_VALUES_FOR_O = 0.5
 
 play_minimax_move_randomized = create_minimax_player(True)
 
@@ -85,7 +85,7 @@ def choose_move_index(q_table, board, epsilon):
 
 
 def play_training_games_x(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=0.9, epsilon=0.9,
+                          learning_rate=0.9, discount_factor=1.0, epsilon=0.8,
                           o_strategies=None):
     if not o_strategies:
         o_strategies = [play_minimax_move_randomized]
@@ -94,7 +94,7 @@ def play_training_games_x(total_games=10000, q_table=qtable,
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=0.9, epsilon=0.9,
+                          learning_rate=0.9, discount_factor=1.0, epsilon=0.8,
                           x_strategies=None):
     if not x_strategies:
         x_strategies = [play_minimax_move_randomized]
