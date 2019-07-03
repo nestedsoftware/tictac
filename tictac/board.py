@@ -3,11 +3,12 @@ import itertools
 import numpy as np
 
 
-from tictac.transform import Transform, Identity, Rotate, Flip
+from tictac.transform import Transform, Identity, Rotate90, Flip
 
-transformations = [Identity(), Rotate(1), Rotate(2), Rotate(3), Flip(np.flipud),
-                   Flip(np.fliplr), Transform(Rotate(1), Flip(np.flipud)),
-                   Transform(Rotate(1), Flip(np.fliplr))]
+transformations = [Identity(), Rotate90(1), Rotate90(2), Rotate90(3),
+                   Flip(np.flipud), Flip(np.fliplr),
+                   Transform(Rotate90(1), Flip(np.flipud)),
+                   Transform(Rotate90(1), Flip(np.fliplr))]
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
@@ -54,6 +55,11 @@ def play_game(x_strategy, o_strategy):
         board = play(board)
 
     return board
+
+
+def play_random_move(board):
+    move = board.get_random_valid_move_index()
+    return board.play_move(move)
 
 
 def is_even(value):

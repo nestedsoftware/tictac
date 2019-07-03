@@ -1,5 +1,5 @@
 from tictac.board import play_games
-from tictac.random_moves import play_random_move
+from board import play_random_move
 from tictac.minimax import create_minimax_player
 from tictac.qtable import (play_training_games_x, play_training_games_o,
                            play_q_table_move)

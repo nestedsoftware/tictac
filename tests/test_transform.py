@@ -1,12 +1,12 @@
 import numpy as np
-from tictac.transform import Transform, Rotate, Flip
+from tictac.transform import Transform, Rotate90, Flip
 
 
 def test_transform():
     b = np.array([[1,  1, -1],
                   [-1, 1,  1],
                   [1, -1, -1]])
-    t = Transform(Rotate(2), Flip(np.flipud))
+    t = Transform(Rotate90(2), Flip(np.flipud))
 
     transformed_b = t.transform(b)
 

@@ -46,9 +46,9 @@ def test_get_game_result_x_wins():
 
 
 def test_get_game_result_o_wins():
-    b = np.array([[ 1,  0, -1],
-                  [ 0, -1,  1],
-                  [-1,  0,  1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0, -1],
+                  [0, -1,  1],
+                  [-1, 0,  1]]).reshape(1, 9)[0]
 
     board = Board(b)
 
@@ -58,9 +58,9 @@ def test_get_game_result_o_wins():
 
 
 def test_get_game_result_draw():
-    b = np.array([[ 1,  1, -1],
+    b = np.array([[1,   1, -1],
                   [-1, -1,  1],
-                  [ 1, -1,  1]]).reshape(1, 9)[0]
+                  [1,  -1,  1]]).reshape(1, 9)[0]
 
     board = Board(b)
 

@@ -17,14 +17,16 @@ class Transform:
 
 
 class Identity:
-    def transform(self, matrix2d):
+    @staticmethod
+    def transform(matrix2d):
         return matrix2d
 
-    def reverse(self, matrix2d):
+    @staticmethod
+    def reverse(matrix2d):
         return matrix2d
 
 
-class Rotate:
+class Rotate90:
     def __init__(self, number_of_rotations):
         self.number_of_rotations = number_of_rotations
         self.op = np.rot90

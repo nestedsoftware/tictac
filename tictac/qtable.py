@@ -5,17 +5,17 @@ from collections import deque
 
 from tictac.board import BoardCache
 from tictac.board import play_game
-from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O, RESULT_X_WINS,
-                          RESULT_O_WINS, RESULT_DRAW)
+from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
+                          RESULT_X_WINS, RESULT_O_WINS, RESULT_DRAW)
 
 from tictac.minimax import create_minimax_player
 
 WIN_VALUE = 1.0
-DRAW_VALUE = 0.5
-LOSS_VALUE = 0.0
+DRAW_VALUE = 0.0
+LOSS_VALUE = -1.0
 
-INITIAL_Q_VALUES_FOR_X = 0.5
-INITIAL_Q_VALUES_FOR_O = 0.5
+INITIAL_Q_VALUES_FOR_X = 0.0
+INITIAL_Q_VALUES_FOR_O = 0.0
 
 play_minimax_move_randomized = create_minimax_player(True)
 
@@ -55,16 +55,20 @@ def get_initial_q_value(board):
 
 
 def get_transformed_move_indexes_and_q_values(qvalues, t):
-    b = np.empty(BOARD_SIZE**2)
+    b_2d = load_q_values_into_2d_board(qvalues)
+
+    reversed_b_2d = t.reverse(b_2d)
+
+    return dict([(index, qvalue) for index, qvalue
+                 in enumerate(reversed_b_2d.flatten()) if not np.isnan(qvalue)])
+
+
+def load_q_values_into_2d_board(qvalues):
+    b = np.empty(BOARD_SIZE ** 2)
     b[:] = np.nan
     for move_index, qvalue in qvalues.items():
         b[move_index] = qvalue
-    b = b.reshape(BOARD_DIMENSIONS)
-
-    reversed_b = t.reverse(b)
-
-    return dict([(index, qvalue) for index, qvalue in enumerate(reversed_b.flatten())
-                 if not np.isnan(qvalue)])
+    return b.reshape(BOARD_DIMENSIONS)
 
 
 qtable = QTable()
@@ -94,7 +98,7 @@ def play_training_games_x(total_games=10000, q_table=qtable,
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=1.0, epsilon=0.8,
+                          learning_rate=0.9, discount_factor=1.0, epsilon=0.95,
                           x_strategies=None):
     if not x_strategies:
         x_strategies = [play_minimax_move_randomized]
