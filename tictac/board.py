@@ -5,7 +5,7 @@ import numpy as np
 
 from tictac.transform import Transform, Identity, Rotate90, Flip
 
-transformations = [Identity(), Rotate90(1), Rotate90(2), Rotate90(3),
+TRANSFORMATIONS = [Identity(), Rotate90(1), Rotate90(2), Rotate90(3),
                    Flip(np.flipud), Flip(np.fliplr),
                    Transform(Rotate90(1), Flip(np.flipud)),
                    Transform(Rotate90(1), Flip(np.fliplr))]
@@ -161,7 +161,7 @@ class BoardCache:
 
 
 def get_symmetrical_board_orientations(board_2d):
-    return [(t.transform(board_2d), t) for t in transformations]
+    return [(t.transform(board_2d), t) for t in TRANSFORMATIONS]
 
 
 def get_rows_cols_and_diagonals(board_2d):

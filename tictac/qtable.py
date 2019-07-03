@@ -15,7 +15,7 @@ DRAW_VALUE = 0.0
 LOSS_VALUE = -1.0
 
 INITIAL_Q_VALUES_FOR_X = 0.0
-INITIAL_Q_VALUES_FOR_O = 0.0
+INITIAL_Q_VALUES_FOR_O = -0.5
 
 play_minimax_move_randomized = create_minimax_player(True)
 
@@ -98,7 +98,7 @@ def play_training_games_x(total_games=10000, q_table=qtable,
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=1.0, epsilon=0.95,
+                          learning_rate=0.95, discount_factor=1.0, epsilon=0.95,
                           x_strategies=None):
     if not x_strategies:
         x_strategies = [play_minimax_move_randomized]
@@ -128,10 +128,8 @@ def play_training_games(total_games, q_table, q_table_player, learning_rate,
 
 def get_strategies_to_use(q_table,  move_history, x_strategies, o_strategies,
                           epsilon):
-    x_strategies = get_strategies(x_strategies, q_table, move_history,
-                                  epsilon)
-    o_strategies = get_strategies(o_strategies, q_table, move_history,
-                                  epsilon)
+    x_strategies = get_strategies(x_strategies, q_table, move_history, epsilon)
+    o_strategies = get_strategies(o_strategies, q_table, move_history, epsilon)
     x_strategies_to_use = itertools.cycle(x_strategies)
     o_strategies_to_use = itertools.cycle(o_strategies)
     return x_strategies_to_use, o_strategies_to_use
