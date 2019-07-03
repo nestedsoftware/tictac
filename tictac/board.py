@@ -6,8 +6,8 @@ import numpy as np
 from tictac.transform import Transform, Identity, Rotate, Flip
 
 transformations = [Identity(), Rotate(1), Rotate(2), Rotate(3), Flip(np.flipud),
-                   Flip(np.fliplr), Transform([Rotate(1), Flip(np.flipud)]),
-                   Transform([Rotate(1), Flip(np.fliplr)])]
+                   Flip(np.fliplr), Transform(Rotate(1), Flip(np.flipud)),
+                   Transform(Rotate(1), Flip(np.fliplr))]
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
@@ -95,6 +95,7 @@ class Board:
         return self.get_game_result() != RESULT_NOT_OVER
 
     def play_move(self, move_index):
+        assert move_index in self.get_valid_move_indexes(), "move must be valid"
         board_copy = np.copy(self.board)
         board_copy[move_index] = self.get_turn()
         return Board(board_copy)
@@ -140,9 +141,10 @@ class BoardCache:
     def get_for_position(self, board):
         board_2d = board.board_2d
 
-        for t in transformations:
-            transformed_board_2d = t.transform(board_2d)
-            result = self.cache.get(transformed_board_2d.tobytes())
+        orientations = get_symmetrical_board_orientations(board_2d)
+
+        for b, t in orientations:
+            result = self.cache.get(b.tobytes())
             if result is not None:
                 return (result, t), True
 
@@ -150,6 +152,10 @@ class BoardCache:
 
     def reset(self):
         self.cache = {}
+
+
+def get_symmetrical_board_orientations(board_2d):
+    return [(t.transform(board_2d), t) for t in transformations]
 
 
 def get_rows_cols_and_diagonals(board_2d):

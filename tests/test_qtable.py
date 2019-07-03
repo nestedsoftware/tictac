@@ -29,25 +29,25 @@ def test_get_q_values_initial():
 
 
 def test_get_action_index_choose_1st_move():
-    b = np.array([[ 1,  0,  0],
-                  [ 1, -1,  1],
-                  [-1,  1, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [-1, 1, -1]]).reshape(1, 9)[0]
 
     board = Board(b)
 
     q_table = QTable()
-    q_table.update_q_value(board, 1, 1)
-    q_table.update_q_value(board, 2, 0.5)
+    q_table.update_q_value(board, 0, 1)
+    q_table.update_q_value(board, 1, 0.5)
 
-    action_index = choose_move_index(q_table, board, 0)
+    move_index = choose_move_index(q_table, board, 0)
 
-    assert action_index == 1
+    assert move_index == 0
 
 
 def test_get_action_index_choose_2nd_move():
-    b = np.array([[ 1,  0,  0],
-                  [ 1, -1,  1],
-                  [-1,  1, -1]]).reshape(1, 9)[0]
+    b = np.array([[1,  0,  0],
+                  [1, -1,  1],
+                  [-1, 1, -1]]).reshape(1, 9)[0]
 
     board = Board(b)
 

@@ -5,7 +5,7 @@ from collections import deque
 
 from tictac.board import BoardCache
 from tictac.board import play_game
-from tictac.board import (BOARD_DIMENSIONS, CELL_X, CELL_O, RESULT_X_WINS,
+from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O, RESULT_X_WINS,
                           RESULT_O_WINS, RESULT_DRAW)
 
 from tictac.minimax import create_minimax_player
@@ -17,7 +17,7 @@ LOSS_VALUE = 0.0
 INITIAL_Q_VALUES_FOR_X = 0.01
 INITIAL_Q_VALUES_FOR_O = 0.01
 
-play_minimax_move_not_randomized = create_minimax_player(False)
+play_minimax_move_randomized = create_minimax_player(True)
 
 
 class QTable:
@@ -25,13 +25,14 @@ class QTable:
         self.qtable = BoardCache()
 
     def get_q_values(self, board):
-        (qvalues, t), found = self.qtable.get_for_position(board)
+        result, found = self.qtable.get_for_position(board)
         if found:
+            qvalues, t = result
             return get_transformed_move_indexes_and_q_values(qvalues, t)
 
         valid_move_indexes = board.get_valid_move_indexes()
         initial_q_value = get_initial_q_value(board)
-        initial_q_values = [initial_q_value for i in valid_move_indexes]
+        initial_q_values = [initial_q_value for _ in valid_move_indexes]
         qvalues = dict(zip(valid_move_indexes, initial_q_values))
 
         self.qtable.set_for_position(board, qvalues)
@@ -54,15 +55,16 @@ def get_initial_q_value(board):
 
 
 def get_transformed_move_indexes_and_q_values(qvalues, t):
-    b = np.empty(BOARD_DIMENSIONS)
+    b = np.empty(BOARD_SIZE**2)
     b[:] = np.nan
-    for k, v in qvalues.items():
-        b[k] = v
+    for move_index, qvalue in qvalues.items():
+        b[move_index] = qvalue
+    b = b.reshape(BOARD_DIMENSIONS)
 
     reversed_b = t.reverse(b)
 
-    return dict([(i, v) for i, v in enumerate(reversed_b.flatten())
-                 if not np.isnan(v)])
+    return dict([(index, qvalue) for index, qvalue in enumerate(reversed_b.flatten())
+                 if not np.isnan(qvalue)])
 
 
 qtable = QTable()
@@ -83,19 +85,19 @@ def choose_move_index(q_table, board, epsilon):
 
 
 def play_training_games_x(total_games=10000, q_table=qtable,
-                          learning_rate=0.9, discount_factor=1.0, epsilon=0,
+                          learning_rate=0.9, discount_factor=0.9, epsilon=0.9,
                           o_strategies=None):
     if not o_strategies:
-        o_strategies = [play_minimax_move_not_randomized]
+        o_strategies = [play_minimax_move_randomized]
     play_training_games(total_games, q_table, CELL_X, learning_rate,
                         discount_factor, epsilon, None, o_strategies)
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
-                          learning_rate=0.1, discount_factor=1.0, epsilon=0,
+                          learning_rate=0.9, discount_factor=0.9, epsilon=0.9,
                           x_strategies=None):
     if not x_strategies:
-        x_strategies = [play_minimax_move_not_randomized]
+        x_strategies = [play_minimax_move_randomized]
     play_training_games(total_games, q_table, CELL_O, learning_rate,
                         discount_factor, epsilon, x_strategies, None)
 

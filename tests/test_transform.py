@@ -11,8 +11,8 @@ def test_transform():
     transformed_b = t.transform(b)
 
     assert np.array_equal(transformed_b, np.array([[-1,  1,  1],
-                                               [1,   1, -1],
-                                               [-1, -1,  1]]))
+                                                   [1,   1, -1],
+                                                   [-1, -1,  1]]))
     reversed_b = t.reverse(transformed_b)
 
     assert np.array_equal(reversed_b,  b)
