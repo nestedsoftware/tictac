@@ -58,7 +58,7 @@ def test_choose_move_index_1st_move():
     q_table.update_q_value(board, 0, 1)
     q_table.update_q_value(board, 1, 0.5)
 
-    move_index = choose_move_index(q_table, board, 0)
+    move_index = choose_move_index(q_table, board, 0, False)
 
     assert move_index == 0
 
@@ -74,7 +74,7 @@ def test_choose_move_index_2nd_move():
     q_table.update_q_value(board, 1, 0.5)
     q_table.update_q_value(board, 2, 1)
 
-    action_index = choose_move_index(q_table, board, 0)
+    action_index = choose_move_index(q_table, board, 0, False)
 
     assert action_index == 2
 
@@ -96,7 +96,7 @@ def test_choose_move_index_with_transformation():
 
     board_transformed = Board(b_transformed)
 
-    move_index = choose_move_index(q_table, board_transformed, 0)
+    move_index = choose_move_index(q_table, board_transformed, 0, False)
 
     assert move_index == 6
 
@@ -105,11 +105,11 @@ def test_play_training_game_x_player():
     q_table = QTable()
     move_history = deque()
     q_table_player = CELL_X
-    x_strategy = create_play_for_training(q_table, move_history, 0)
+    x_strategy = create_play_for_training(q_table, move_history, 0, False)
     o_strategy = play_random_move
 
     play_training_game(q_table, move_history, q_table_player, x_strategy,
-                       o_strategy, 0.9, 1)
+                       o_strategy, 0.9, 1, False)
 
     init = INITIAL_Q_VALUES_FOR_X
     first_board = np.copy(new_board)
@@ -152,10 +152,10 @@ def test_play_training_game_o_player():
     move_history = deque()
     q_table_player = CELL_O
     x_strategy = play_random_move
-    o_strategy = create_play_for_training(q_table, move_history, 0)
+    o_strategy = create_play_for_training(q_table, move_history, 0, False)
 
     play_training_game(q_table, move_history, q_table_player, x_strategy,
-                       o_strategy, 0.9, 1)
+                       o_strategy, 0.9, 1, False)
 
     init = INITIAL_Q_VALUES_FOR_O
     first_board = np.copy(new_board)
@@ -186,7 +186,7 @@ def test_play_training_game_o_player():
     third_board = np.copy(second_board)
     third_board[1] = CELL_O
     third_board[5] = CELL_X
-    
+
     expected_move_indexes_and_q_values = {2: 1.0,
                                           3: init, 4: init,
                                           7: init}

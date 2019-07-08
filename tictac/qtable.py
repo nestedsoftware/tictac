@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import operator
 import itertools
 from collections import deque
@@ -23,6 +24,7 @@ play_minimax_move_randomized = create_minimax_player(True)
 class QTable:
     def __init__(self):
         self.qtable = BoardCache()
+        self.partner = None
 
     def get_q_values(self, board):
         result, found = self.qtable.get_for_position(board)
@@ -38,6 +40,9 @@ class QTable:
         self.qtable.set_for_position(board, qvalues)
 
         return qvalues
+
+    def get_q_value(self, board, move_index):
+        return self.get_q_values(board)[move_index]
 
     def update_q_value(self, board, move_index, qvalue):
         qvalues = self.get_q_values(board)
@@ -73,53 +78,88 @@ def load_q_values_into_2d_board(qvalues):
 
 qtable = QTable()
 
+# double q-learning
+qtable_b = QTable()
+qtable_b.partner = qtable
+qtable.partner = qtable_b
 
-def play_q_table_move(board, q_table=qtable):
-    move = choose_move_index(q_table, board, 0)
-    return board.play_move(move)
+
+def create_q_table_play(is_double_q):
+    def play(board, q_table=qtable, is_double_q_learning=is_double_q):
+        return play_q_table_move(board, q_table, is_double_q_learning)
+
+    return play
 
 
-def choose_move_index(q_table, board, epsilon):
+def play_q_table_move(board, q_table, is_double_q_learning):
+    move_index = choose_move_index(q_table, board, 0, is_double_q_learning)
+    return board.play_move(move_index)
+
+
+def choose_move_index(q_table, board, epsilon, is_double_q_learning):
     if epsilon:
         random_value_from_0_to_1 = np.random.uniform()
         if random_value_from_0_to_1 < epsilon:
             return board.get_random_valid_move_index()
 
-    return q_table.get_move_index_and_max_q_value(board)[0]
+    if is_double_q_learning is False:
+        return q_table.get_move_index_and_max_q_value(board)[0]
+
+    q_values_a = q_table.get_q_values(board)
+    q_values_b = q_table.partner.get_q_values(board)
+
+    average_q_values = average(q_values_a, q_values_b)
+
+    return max(average_q_values.items(), key=operator.itemgetter(1))[0]
+
+
+def average(q_values_a, q_values_b):
+    sorted_q_value_tuples_a = sorted(q_values_a.items())
+    sorted_q_value_tuples_b = sorted(q_values_b.items())
+
+    zipped = zip(sorted_q_value_tuples_a, sorted_q_value_tuples_b)
+
+    averaged = [(move_a, (qvalue_a + qvalue_b) / 2.0)
+                for ((move_a, qvalue_a), (_, qvalue_b)) in zipped]
+
+    return dict(averaged)
 
 
 def play_training_games_x(total_games=10000, q_table=qtable,
                           learning_rate=0.9, discount_factor=1.0, epsilon=0.8,
-                          o_strategies=None):
+                          o_strategies=None, is_double_q_learning=False):
     if not o_strategies:
         o_strategies = [play_minimax_move_randomized]
     play_training_games(total_games, q_table, CELL_X, learning_rate,
-                        discount_factor, epsilon, None, o_strategies)
+                        discount_factor, epsilon, None, o_strategies,
+                        is_double_q_learning)
 
 
 def play_training_games_o(total_games=10000, q_table=qtable,
                           learning_rate=0.95, discount_factor=1.0, epsilon=0.95,
-                          x_strategies=None):
+                          x_strategies=None, is_double_q_learning=False):
     if not x_strategies:
         x_strategies = [play_minimax_move_randomized]
     play_training_games(total_games, q_table, CELL_O, learning_rate,
-                        discount_factor, epsilon, x_strategies, None)
+                        discount_factor, epsilon, x_strategies, None,
+                        is_double_q_learning)
 
 
 def play_training_games(total_games, q_table, q_table_player, learning_rate,
-                        discount_factor, epsilon, x_strategies, o_strategies):
+                        discount_factor, epsilon, x_strategies, o_strategies,
+                        is_double_q_learning):
     for game in range(total_games):
         move_history = deque()
         strategies = get_strategies_to_use(q_table, move_history,
                                            x_strategies, o_strategies,
-                                           epsilon)
+                                           epsilon, is_double_q_learning)
 
         x_strategy_to_use = next(strategies[0])
         o_strategy_to_use = next(strategies[1])
 
         play_training_game(q_table, move_history, q_table_player,
                            x_strategy_to_use, o_strategy_to_use,
-                           learning_rate, discount_factor)
+                           learning_rate, discount_factor, is_double_q_learning)
 
         if (game+1) % (total_games / 10) == 0:
             epsilon = max(0, epsilon - 0.1)
@@ -127,46 +167,75 @@ def play_training_games(total_games, q_table, q_table_player, learning_rate,
 
 
 def get_strategies_to_use(q_table,  move_history, x_strategies, o_strategies,
-                          epsilon):
-    x_strategies = get_strategies(x_strategies, q_table, move_history, epsilon)
-    o_strategies = get_strategies(o_strategies, q_table, move_history, epsilon)
+                          epsilon, is_double_q_learning):
+    x_strategies = get_strategies(x_strategies, q_table, move_history, epsilon,
+                                  is_double_q_learning)
+    o_strategies = get_strategies(o_strategies, q_table, move_history, epsilon,
+                                  is_double_q_learning)
     x_strategies_to_use = itertools.cycle(x_strategies)
     o_strategies_to_use = itertools.cycle(o_strategies)
     return x_strategies_to_use, o_strategies_to_use
 
 
-def get_strategies(strategy, q_table, move_history, epsilon):
-    return ([create_play_for_training(q_table, move_history, epsilon)]
+def get_strategies(strategy, q_table, move_history, epsilon,
+                   is_double_q_learning):
+    return ([create_play_for_training(q_table, move_history, epsilon,
+                                      is_double_q_learning)]
             if strategy is None else strategy)
 
 
 def play_training_game(q_table, move_history, q_table_player, x_strategy,
-                       o_strategy, learning_rate, discount_factor):
+                       o_strategy, learning_rate, discount_factor,
+                       is_double_q_learning):
     board = play_game(x_strategy, o_strategy)
 
     update_training_gameover(q_table, move_history, q_table_player, board,
-                             learning_rate, discount_factor)
+                             learning_rate, discount_factor,
+                             is_double_q_learning)
 
 
 def update_training_gameover(q_table, move_history, q_table_player, board,
-                             learning_rate, discount_factor):
-    new_q_value = get_game_result_value(q_table_player, board)
-    final_position, final_move = move_history[0]
-    q_table.update_q_value(final_position, final_move, new_q_value)
-    max_q_value = q_table.get_move_index_and_max_q_value(final_position)[1]
+                             learning_rate, discount_factor,
+                             is_double_q_learning):
 
+    new_q_value = get_game_result_value(q_table_player, board)
+    next_position, move = move_history[0]
+
+    q_tables = get_q_tables(q_table, is_double_q_learning)
+    for q in q_tables:
+        q.update_q_value(next_position, move, new_q_value)
+
+    q_tables_cycle = itertools.cycle(q_tables)
+    next_q_table = next(q_tables_cycle)
     for (position, move_index) in list(move_history)[1:]:
-        q_values = q_table.get_q_values(position)
-        q_value = q_values[move_index]
+        current_q_table = next(q_tables_cycle)
+        q_value = current_q_table.get_q_value(position, move_index)
+        max_move, _ = current_q_table.get_move_index_and_max_q_value(
+            next_position)
+        max_q_value = next_q_table.get_q_value(next_position, max_move)
+
         new_q_value = ((1 - learning_rate) * q_value
                        + learning_rate * discount_factor * max_q_value)
-        q_table.update_q_value(position, move_index, new_q_value)
-        max_q_value = q_table.get_move_index_and_max_q_value(position)[1]
+        current_q_table.update_q_value(position, move_index, new_q_value)
+
+        next_q_table = current_q_table
+        next_position = position
 
 
-def create_play_for_training(q_table, move_history, epsilon):
+def get_q_tables(q_table, is_double_q_learning):
+    q_tables = [q_table]
+    if is_double_q_learning is True:
+        q_tables = [q_table, q_table.partner]
+    random.shuffle(q_tables)
+
+    return q_tables
+
+
+def create_play_for_training(q_table, move_history, epsilon,
+                             is_double_q_learning):
     def play(board):
-        move_index = choose_move_index(q_table, board, epsilon)
+        move_index = choose_move_index(q_table, board, epsilon,
+                                       is_double_q_learning)
         move_history.appendleft((board, move_index))
         return board.play_move(move_index)
 
