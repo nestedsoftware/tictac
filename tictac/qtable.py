@@ -97,7 +97,7 @@ def play_q_table_move(board, q_tables=None):
 
 
 def choose_move_index(q_tables, board, epsilon):
-    if epsilon:
+    if epsilon > 0:
         random_value_from_0_to_1 = np.random.uniform()
         if random_value_from_0_to_1 < epsilon:
             return board.get_random_valid_move_index()
@@ -151,8 +151,10 @@ def play_training_games(total_games, q_tables, q_table_player, learning_rate,
         strategies = get_strategies_to_use(q_tables, move_history,
                                            x_strategies, o_strategies, epsilon)
 
-        x_strategy_to_use = next(strategies[0])
-        o_strategy_to_use = next(strategies[1])
+        x_strategies_to_use, o_strategies_to_use = strategies
+
+        x_strategy_to_use = next(x_strategies_to_use)
+        o_strategy_to_use = next(o_strategies_to_use)
 
         play_training_game(q_tables, move_history, q_table_player,
                            x_strategy_to_use, o_strategy_to_use, learning_rate,
@@ -172,9 +174,9 @@ def get_strategies_to_use(q_tables,  move_history, x_strategies, o_strategies,
     return x_strategies_to_use, o_strategies_to_use
 
 
-def get_strategies(strategy, q_tables, move_history, epsilon):
+def get_strategies(strategies, q_tables, move_history, epsilon):
     return ([create_training_player(q_tables, move_history, epsilon)]
-            if strategy is None else strategy)
+            if strategies is None else strategies)
 
 
 def play_training_game(q_tables, move_history, q_table_player, x_strategy,
@@ -205,6 +207,7 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
 
         new_q_value = ((1 - learning_rate) * q_value
                        + learning_rate * discount_factor * max_q_value)
+
         current_q_table.update_q_value(position, move_index, new_q_value)
 
         next_q_table = current_q_table
