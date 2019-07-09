@@ -204,7 +204,7 @@ def test_get_move_average_q_value_pairs():
                      [1, -1,  1],
                      [-1, 1, -1]])
 
-    b = b_2d.reshape(1,9)[0]
+    b = b_2d.reshape(1, 9)[0]
 
     board = Board(b)
 
