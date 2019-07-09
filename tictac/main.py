@@ -40,9 +40,13 @@ play_games(1000, play_random_move, play_minimax_move_randomized)
 print("")
 
 print("Training qtable X vs. minimax random...")
-play_training_games_x(q_tables=double_qtables)
+play_training_games_x(q_tables=double_qtables,
+                      o_strategies=[play_random_move,
+                                    play_minimax_move_randomized])
 print("Training qtable O vs. minimax random...")
-play_training_games_o(q_tables=double_qtables)
+play_training_games_o(q_tables=double_qtables,
+                      x_strategies=[play_random_move,
+                                    play_minimax_move_randomized])
 print("")
 
 play_q_table_move = create_q_table_player(double_qtables)

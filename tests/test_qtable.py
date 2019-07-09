@@ -7,7 +7,7 @@ from collections import deque
 from tictac.board import Board, CELL_X, CELL_O, new_board, play_random_move
 from tictac.qtable import (INITIAL_Q_VALUES_FOR_O, INITIAL_Q_VALUES_FOR_X,
                            QTable, choose_move_index, create_training_player,
-                           play_training_game)
+                           play_training_game, get_move_average_q_value_pairs)
 
 
 @pytest.fixture(autouse=True)
@@ -194,3 +194,26 @@ def test_play_training_game_o_player():
     move_indexes_and_q_values = q_table.get_q_values(Board(third_board))
 
     assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+
+def test_get_move_average_q_value_pairs():
+    qtable_a = QTable()
+    qtable_b = QTable()
+
+    b_2d = np.array([[1,  0,  0],
+                     [1, -1,  1],
+                     [-1, 1, -1]])
+
+    b = b_2d.reshape(1,9)[0]
+
+    board = Board(b)
+
+    qtable_a.update_q_value(board, 1, 0.0)
+    qtable_a.update_q_value(board, 2, 1.0)
+
+    qtable_b.update_q_value(board, 1, -0.5)
+    qtable_b.update_q_value(board, 2, 0.5)
+
+    pairs = get_move_average_q_value_pairs([qtable_a, qtable_b], board)
+
+    assert pairs == [(1, -0.25), (2, 0.75)]

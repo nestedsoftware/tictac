@@ -108,20 +108,20 @@ def choose_move_index(q_tables, board, epsilon):
 
 
 def get_move_average_q_value_pairs(q_tables, board):
-    move_indexes = q_tables[0].get_q_values(board).keys()
-    move_average_q_value_pairs = [
-        (move_index,
-         stats.mean(gather_q_values_for_move(q_tables, board, move_index)))
-        for move_index in move_indexes]
-    return move_average_q_value_pairs
+    move_indexes = sorted(q_tables[0].get_q_values(board).keys())
+
+    avg_q_values = [stats.mean(gather_q_values_for_move(q_tables, board, mi))
+                    for mi in move_indexes]
+
+    return list(zip(move_indexes, avg_q_values))
 
 
 def gather_q_values_for_move(q_tables, board, move_index):
     return [q_table.get_q_value(board, move_index) for q_table in q_tables]
 
 
-def play_training_games_x(total_games=10000, q_tables=None,
-                          learning_rate=0.9, discount_factor=1.0, epsilon=0.8,
+def play_training_games_x(total_games=30000, q_tables=None,
+                          learning_rate=0.1, discount_factor=1.0, epsilon=0.8,
                           o_strategies=None):
     if q_tables is None:
         q_tables = qtables
@@ -132,8 +132,8 @@ def play_training_games_x(total_games=10000, q_tables=None,
                         discount_factor, epsilon, None, o_strategies)
 
 
-def play_training_games_o(total_games=10000, q_tables=None,
-                          learning_rate=0.95, discount_factor=1.0, epsilon=0.95,
+def play_training_games_o(total_games=30000, q_tables=None,
+                          learning_rate=0.1, discount_factor=1.0, epsilon=0.95,
                           x_strategies=None):
     if q_tables is None:
         q_tables = qtables
