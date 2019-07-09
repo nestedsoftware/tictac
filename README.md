@@ -6,7 +6,7 @@ Code requires python 3, numpy, and pytest.
 * Run tests: `$ pytest`
 * Run demo: `$ python -m tictac.main`
 
-Below are the most recent demo results. It took quite a bit of fiddling, the current qtable agent plays near-perfect games as O against itself, minimax, and random. Getting good result for the X player was pretty straightforward, but for O it took quite a bit of fiddling with the hyperparameters. 
+Below are the most recent demo results. The current qtable agent plays near-perfect games as O against itself, minimax, and random. Getting good result for the X player was pretty straightforward, but for O it took quite a bit of fiddling with the hyperparameters.
 
 Latest results:
 
