@@ -1,8 +1,8 @@
 from tictac.board import play_games
 from tictac.board import play_random_move
 from tictac.minimax import create_minimax_player
-from tictac.qtable import (play_training_games_x, play_training_games_o,
-                           create_q_table_play)
+from tictac.qtable import (double_qtables, play_training_games_x,
+                           play_training_games_o, create_q_table_player)
 
 play_minimax_move_randomized = create_minimax_player(True)
 play_minimax_move_not_randomized = create_minimax_player(False)
@@ -40,13 +40,12 @@ play_games(1000, play_random_move, play_minimax_move_randomized)
 print("")
 
 print("Training qtable X vs. minimax random...")
-play_training_games_x(is_double_q_learning=True)
+play_training_games_x(q_tables=double_qtables)
 print("Training qtable O vs. minimax random...")
-play_training_games_o(is_double_q_learning=True)
+play_training_games_o(q_tables=double_qtables)
 print("")
 
-
-play_q_table_move = create_q_table_play(True)
+play_q_table_move = create_q_table_player(double_qtables)
 print("Playing qtable vs random:")
 print("-------------------------")
 play_games(1000, play_q_table_move, play_random_move)

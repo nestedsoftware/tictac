@@ -6,7 +6,7 @@ from collections import deque
 
 from tictac.board import Board, CELL_X, CELL_O, new_board, play_random_move
 from tictac.qtable import (INITIAL_Q_VALUES_FOR_O, INITIAL_Q_VALUES_FOR_X,
-                           QTable, choose_move_index, create_play_for_training,
+                           QTable, choose_move_index, create_training_player,
                            play_training_game)
 
 
@@ -58,7 +58,7 @@ def test_choose_move_index_1st_move():
     q_table.update_q_value(board, 0, 1)
     q_table.update_q_value(board, 1, 0.5)
 
-    move_index = choose_move_index(q_table, board, 0, False)
+    move_index = choose_move_index([q_table], board, 0)
 
     assert move_index == 0
 
@@ -74,7 +74,7 @@ def test_choose_move_index_2nd_move():
     q_table.update_q_value(board, 1, 0.5)
     q_table.update_q_value(board, 2, 1)
 
-    action_index = choose_move_index(q_table, board, 0, False)
+    action_index = choose_move_index([q_table], board, 0)
 
     assert action_index == 2
 
@@ -96,7 +96,7 @@ def test_choose_move_index_with_transformation():
 
     board_transformed = Board(b_transformed)
 
-    move_index = choose_move_index(q_table, board_transformed, 0, False)
+    move_index = choose_move_index([q_table], board_transformed, 0)
 
     assert move_index == 6
 
@@ -105,11 +105,11 @@ def test_play_training_game_x_player():
     q_table = QTable()
     move_history = deque()
     q_table_player = CELL_X
-    x_strategy = create_play_for_training(q_table, move_history, 0, False)
+    x_strategy = create_training_player([q_table], move_history, 0)
     o_strategy = play_random_move
 
-    play_training_game(q_table, move_history, q_table_player, x_strategy,
-                       o_strategy, 0.9, 1, False)
+    play_training_game([q_table], move_history, q_table_player, x_strategy,
+                       o_strategy, 0.9, 1)
 
     init = INITIAL_Q_VALUES_FOR_X
     first_board = np.copy(new_board)
@@ -152,10 +152,10 @@ def test_play_training_game_o_player():
     move_history = deque()
     q_table_player = CELL_O
     x_strategy = play_random_move
-    o_strategy = create_play_for_training(q_table, move_history, 0, False)
+    o_strategy = create_training_player([q_table], move_history, 0)
 
-    play_training_game(q_table, move_history, q_table_player, x_strategy,
-                       o_strategy, 0.9, 1, False)
+    play_training_game([q_table], move_history, q_table_player, x_strategy,
+                       o_strategy, 0.9, 1)
 
     init = INITIAL_Q_VALUES_FOR_O
     first_board = np.copy(new_board)
