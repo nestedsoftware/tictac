@@ -120,7 +120,7 @@ def gather_q_values_for_move(q_tables, board, move_index):
     return [q_table.get_q_value(board, move_index) for q_table in q_tables]
 
 
-def play_training_games_x(total_games=30000, q_tables=None,
+def play_training_games_x(total_games=50000, q_tables=None,
                           learning_rate=0.1, discount_factor=1.0, epsilon=0.8,
                           o_strategies=None):
     if q_tables is None:
@@ -132,7 +132,7 @@ def play_training_games_x(total_games=30000, q_tables=None,
                         discount_factor, epsilon, None, o_strategies)
 
 
-def play_training_games_o(total_games=30000, q_tables=None,
+def play_training_games_o(total_games=50000, q_tables=None,
                           learning_rate=0.1, discount_factor=1.0, epsilon=0.95,
                           x_strategies=None):
     if q_tables is None:
