@@ -17,7 +17,7 @@ DRAW_VALUE = 0.0
 LOSS_VALUE = -1.0
 
 INITIAL_Q_VALUES_FOR_X = 0.0
-INITIAL_Q_VALUES_FOR_O = -0.5
+INITIAL_Q_VALUES_FOR_O = 0.0
 
 play_minimax_move_randomized = create_minimax_player(True)
 
