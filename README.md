@@ -14,9 +14,9 @@ Latest results:
 C:\Dev\python\tictac>python -m tictac.main
 Playing random vs random:
 -------------------------
-x wins: 58.70%
-o wins: 27.90%
-draw  : 13.40%
+x wins: 57.80%
+o wins: 30.00%
+draw  : 12.20%
 
 Playing minimax not random vs minimax random:
 ---------------------------------------------
@@ -44,15 +44,15 @@ draw  : 100.00%
 
 Playing minimax random vs random:
 ---------------------------------
-x wins: 96.70%
+x wins: 97.80%
 o wins: 0.00%
-draw  : 3.30%
+draw  : 2.20%
 
 Playing random vs minimax random:
 ---------------------------------
 x wins: 0.00%
-o wins: 78.10%
-draw  : 21.90%
+o wins: 77.40%
+draw  : 22.60%
 
 Training qtable X vs. random and minimax random...
 played 5000 games, using epsilon=0.85...
@@ -79,9 +79,9 @@ played 50000 games, using epsilon=0...
 
 Playing qtable vs random:
 -------------------------
-x wins: 99.70%
+x wins: 99.80%
 o wins: 0.00%
-draw  : 0.30%
+draw  : 0.20%
 
 Playing qtable vs minimax random:
 ---------------------------------
@@ -98,8 +98,8 @@ draw  : 100.00%
 Playing random vs qtable:
 -------------------------
 x wins: 0.00%
-o wins: 91.30%
-draw  : 8.70%
+o wins: 93.00%
+draw  : 7.00%
 
 Playing minimax random vs qtable:
 ---------------------------------
