@@ -161,7 +161,7 @@ def test_play_training_game_o_player():
     first_board = np.copy(new_board)
     first_board[6] = CELL_X
 
-    qvalue = 0.7150000000000001
+    qvalue = 0.81
     expected_move_indexes_and_q_values = {0: qvalue, 1: init, 2: init,
                                           3: init, 4: init, 5: init,
                                           7: init, 8: init}
@@ -174,7 +174,7 @@ def test_play_training_game_o_player():
     second_board[0] = CELL_O
     second_board[8] = CELL_X
 
-    qvalue = 0.8500000000000001
+    qvalue = 0.9
     expected_move_indexes_and_q_values = {1: qvalue, 2: init,
                                           3: init, 4: init, 5: init,
                                           7: init}
