@@ -192,25 +192,27 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
     new_q_value = get_game_result_value(q_table_player, board)
     next_position, move = move_history[0]
 
-    q_tables = get_shuffled_q_tables(q_tables)
-    for q in q_tables:
-        q.update_q_value(next_position, move, new_q_value)
+    for q_table in q_tables:
+        q_table.update_q_value(next_position, move, new_q_value)
 
-    q_tables_cycle = itertools.cycle(q_tables)
-    next_q_table = next(q_tables_cycle)
     for (position, move_index) in list(move_history)[1:]:
+        q_tables = get_shuffled_q_tables(q_tables)
+        q_tables_cycle = itertools.cycle(q_tables)
         current_q_table = next(q_tables_cycle)
-        q_value = current_q_table.get_q_value(position, move_index)
-        max_move, _ = current_q_table.get_move_index_and_max_q_value(
-            next_position)
-        max_q_value = next_q_table.get_q_value(next_position, max_move)
 
-        new_q_value = ((1 - learning_rate) * q_value
-                       + learning_rate * discount_factor * max_q_value)
+        current_q_value = current_q_table.get_q_value(position, move_index)
+        max_next_move_index, _ = current_q_table.get_move_index_and_max_q_value(
+            next_position)
+
+        next_q_table = next(q_tables_cycle)
+        max_next_q_value = next_q_table.get_q_value(next_position,
+                                                    max_next_move_index)
+
+        new_q_value = ((1 - learning_rate) * current_q_value
+                       + learning_rate * discount_factor * max_next_q_value)
 
         current_q_table.update_q_value(position, move_index, new_q_value)
 
-        next_q_table = current_q_table
         next_position = position
 
 
