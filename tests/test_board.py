@@ -36,7 +36,7 @@ def test_get_rows_cols_and_diagonals():
 def test_get_game_result_x_wins():
     b = np.array([[1,  1, -1],
                   [0,  1, -1],
-                  [0, -1,  1]]).reshape(1, 9)[0]
+                  [0, -1,  1]]).flatten()
 
     board = Board(b)
 
@@ -48,7 +48,7 @@ def test_get_game_result_x_wins():
 def test_get_game_result_o_wins():
     b = np.array([[1,  0, -1],
                   [0, -1,  1],
-                  [-1, 0,  1]]).reshape(1, 9)[0]
+                  [-1, 0,  1]]).flatten()
 
     board = Board(b)
 
@@ -60,7 +60,7 @@ def test_get_game_result_o_wins():
 def test_get_game_result_draw():
     b = np.array([[1,   1, -1],
                   [-1, -1,  1],
-                  [1,  -1,  1]]).reshape(1, 9)[0]
+                  [1,  -1,  1]]).flatten()
 
     board = Board(b)
 
@@ -72,7 +72,7 @@ def test_get_game_result_draw():
 def test_get_game_result_not_over():
     b = np.array([[1,  1, -1],
                   [0, -1,  0],
-                  [1, -1,  1]]).reshape(1, 9)[0]
+                  [1, -1,  1]]).flatten()
 
     board = Board(b)
 

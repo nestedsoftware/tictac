@@ -18,7 +18,7 @@ def reset_cache():
 def test_get_position_value_x_wins():
     b = np.array([[1, 0, -1],
                   [1, 0, -1],
-                  [1, 0,  0]]).reshape(1, 9)[0]
+                  [1, 0,  0]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -28,7 +28,7 @@ def test_get_position_value_x_wins():
 def test_get_position_value_o_wins():
     b = np.array([[1, 0, -1],
                   [1, 0, -1],
-                  [0, 1, -1]]).reshape(1, 9)[0]
+                  [0, 1, -1]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -38,7 +38,7 @@ def test_get_position_value_o_wins():
 def test_get_position_value_draw():
     b = np.array([[1, -1,  1],
                   [1,  1, -1],
-                  [-1, 1, -1]]).reshape(1, 9)[0]
+                  [-1, 1, -1]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -48,7 +48,7 @@ def test_get_position_value_draw():
 def test_get_position_value_draw_is_best_case():
     b = np.array([[1, -1,  0],
                   [1,  1, -1],
-                  [-1, 1, -1]]).reshape(1, 9)[0]
+                  [-1, 1, -1]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -58,7 +58,7 @@ def test_get_position_value_draw_is_best_case():
 def test_get_position_value_o_wins_in_best_case_x_turn():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [-1, 0, -1]]).reshape(1, 9)[0]
+                  [-1, 0, -1]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -68,7 +68,7 @@ def test_get_position_value_o_wins_in_best_case_x_turn():
 def test_get_position_value_o_wins_in_best_case_o_turn():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [0,  0, -1]]).reshape(1, 9)[0]
+                  [0,  0, -1]]).flatten()
 
     value = get_position_value(Board(b))
 
@@ -78,7 +78,7 @@ def test_get_position_value_o_wins_in_best_case_o_turn():
 def test_get_move_value_pairs_for_position_o_wins_in_best_case():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [0,  0, -1]]).reshape(1, 9)[0]
+                  [0,  0, -1]]).flatten()
 
     move_value_pairs = get_move_value_pairs(Board(b))
 
@@ -88,13 +88,13 @@ def test_get_move_value_pairs_for_position_o_wins_in_best_case():
 def test_play_minimax_move_o_wins_in_best_case():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [0,  0, -1]]).reshape(1, 9)[0]
+                  [0,  0, -1]]).flatten()
 
     result = play_minimax_move(Board(b)).board
 
     assert np.array_equal(result, np.array([[1,  0,  0],
                                             [1, -1,  1],
-                                            [-1, 0, -1]]).reshape(1, 9)[0])
+                                            [-1, 0, -1]]).flatten())
 
 
 def test_get_orientations():
@@ -144,7 +144,7 @@ def test_get_orientations():
 def test_get_position_value_from_cache():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [0,  0, -1]]).reshape(1, 9)[0]
+                  [0,  0, -1]]).flatten()
 
     value, found = cache.get_for_position(Board(b))
 

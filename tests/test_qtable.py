@@ -19,7 +19,7 @@ def seed_random_number_generators():
 def test_get_q_values_initial_x_turn():
     b = np.array([[1, 0,  0],
                   [1, 0, -1],
-                  [1, 0,  0]]).reshape(1, 9)[0]
+                  [1, 0,  0]]).flatten()
 
     q_table = QTable()
 
@@ -35,7 +35,7 @@ def test_get_q_values_initial_x_turn():
 def test_get_q_values_initial_o_turn():
     b = np.array([[1, 0, -1],
                   [1, 0, -1],
-                  [1, 0,  0]]).reshape(1, 9)[0]
+                  [1, 0,  0]]).flatten()
 
     q_table = QTable()
 
@@ -50,7 +50,7 @@ def test_get_q_values_initial_o_turn():
 def test_choose_move_index_1st_move():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [-1, 1, -1]]).reshape(1, 9)[0]
+                  [-1, 1, -1]]).flatten()
 
     board = Board(b)
 
@@ -66,7 +66,7 @@ def test_choose_move_index_1st_move():
 def test_choose_move_index_2nd_move():
     b = np.array([[1,  0,  0],
                   [1, -1,  1],
-                  [-1, 1, -1]]).reshape(1, 9)[0]
+                  [-1, 1, -1]]).flatten()
 
     board = Board(b)
 
@@ -84,7 +84,7 @@ def test_choose_move_index_with_transformation():
                      [1, -1,  1],
                      [-1, 1, -1]])
 
-    b = b_2d.reshape(1, 9)[0]
+    b = b_2d.flatten()
 
     board = Board(b)
 
@@ -92,7 +92,7 @@ def test_choose_move_index_with_transformation():
     q_table.update_q_value(board, 1, -1)
     q_table.update_q_value(board, 2, 1)
 
-    b_transformed = np.rot90(b_2d, 2).reshape(1, 9)[0]
+    b_transformed = np.rot90(b_2d, 2).flatten()
 
     board_transformed = Board(b_transformed)
 
@@ -204,7 +204,7 @@ def test_get_move_average_q_value_pairs():
                      [1, -1,  1],
                      [-1, 1, -1]])
 
-    b = b_2d.reshape(1, 9)[0]
+    b = b_2d.flatten()
 
     board = Board(b)
 
