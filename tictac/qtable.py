@@ -5,7 +5,7 @@ import operator
 import itertools
 from collections import deque
 
-from tictac.board import BoardCache
+from tictac.board import BoardCache, Board
 from tictac.board import play_game
 from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
                           RESULT_X_WINS, RESULT_O_WINS, RESULT_DRAW)
@@ -29,12 +29,13 @@ class QTable:
     def get_q_values(self, board):
         result, found = self.qtable.get_for_position(board)
         if found:
-            qvalues, t = result
-            return get_transformed_move_indexes_and_q_values(qvalues, t)
+            qvalues, transform = result
+            return reverse_transform_qvalues(qvalues, transform)
 
         valid_move_indexes = board.get_valid_move_indexes()
         initial_q_value = get_initial_q_value(board)
         initial_q_values = [initial_q_value for _ in valid_move_indexes]
+
         qvalues = dict(zip(valid_move_indexes, initial_q_values))
 
         self.qtable.set_for_position(board, qvalues)
@@ -47,7 +48,15 @@ class QTable:
     def update_q_value(self, board, move_index, qvalue):
         qvalues = self.get_q_values(board)
         qvalues[move_index] = qvalue
-        self.qtable.set_for_position(board, qvalues)
+
+        result, found = self.qtable.get_for_position(board)
+        assert found is True, "position must be cached at this point"
+        _, transform = result
+
+        transformed_board, transformed_qvalues = transform_board_and_qvalues(
+            board, qvalues, transform)
+
+        self.qtable.set_for_position(transformed_board, transformed_qvalues)
 
     def get_move_index_and_max_q_value(self, board):
         q_values = self.get_q_values(board)
@@ -59,20 +68,34 @@ def get_initial_q_value(board):
             else INITIAL_Q_VALUES_FOR_O)
 
 
-def get_transformed_move_indexes_and_q_values(qvalues, t):
-    b_2d = load_q_values_into_2d_board(qvalues)
+def transform_board_and_qvalues(board, q_values, transform):
+    b_2d_transformed = transform.transform(board.board_2d)
 
-    reversed_b_2d = t.reverse(b_2d)
+    q_2d = load_q_values_into_2d_board(q_values)
+    q_2d_transformed = transform.transform(q_2d)
+    q_values_transformed = dict([(mi, qv) for (mi, qv)
+                                 in enumerate(q_2d_transformed.flatten())
+                                 if not np.isnan(qv)])
+
+    return Board(b_2d_transformed.flatten()), q_values_transformed
+
+
+def reverse_transform_qvalues(qvalues, transform):
+    qvalues_2d = load_q_values_into_2d_board(qvalues)
+
+    qvalues_2d_transform_reversed = transform.reverse(qvalues_2d)
 
     return dict([(index, qvalue) for index, qvalue
-                 in enumerate(reversed_b_2d.flatten()) if not np.isnan(qvalue)])
+                 in enumerate(qvalues_2d_transform_reversed.flatten())
+                 if not np.isnan(qvalue)])
 
 
 def load_q_values_into_2d_board(qvalues):
-    b = np.empty(BOARD_SIZE ** 2)
+    b = np.empty(BOARD_SIZE**2)
     b[:] = np.nan
     for move_index, qvalue in qvalues.items():
         b[move_index] = qvalue
+
     return b.reshape(BOARD_DIMENSIONS)
 
 
@@ -120,7 +143,7 @@ def gather_q_values_for_move(q_tables, board, move_index):
     return [q_table.get_q_value(board, move_index) for q_table in q_tables]
 
 
-def play_training_games_x(total_games=50000, q_tables=None,
+def play_training_games_x(total_games=6000, q_tables=None,
                           learning_rate=0.1, discount_factor=1.0, epsilon=0.95,
                           o_strategies=None):
     if q_tables is None:
@@ -132,7 +155,7 @@ def play_training_games_x(total_games=50000, q_tables=None,
                         discount_factor, epsilon, None, o_strategies)
 
 
-def play_training_games_o(total_games=50000, q_tables=None,
+def play_training_games_o(total_games=6000, q_tables=None,
                           learning_rate=0.1, discount_factor=1.0, epsilon=0.95,
                           x_strategies=None):
     if q_tables is None:

@@ -217,3 +217,44 @@ def test_get_move_average_q_value_pairs():
     pairs = get_move_average_q_value_pairs([qtable_a, qtable_b], board)
 
     assert pairs == [(1, -0.25), (2, 0.75)]
+
+
+def test_update_q_value():
+    qtable = QTable()
+
+    b_2d = np.array([[1.0,  0.0,  0.0],
+                     [1.0, -1.0,  0.0],
+                     [0.0,  1.0, -1.0]])
+    b = b_2d.flatten()
+
+    board = Board(b)
+
+    qvalues = qtable.get_q_values(board)
+
+    init = INITIAL_Q_VALUES_FOR_O
+
+    expected_qvalues = {1: init, 2: init, 5: init, 6: init}
+
+    assert qvalues == expected_qvalues
+
+    b_rot90_flipud_2d = np.flipud(np.rot90(b_2d))
+    b_rot90_flipud = b_rot90_flipud_2d.flatten()
+
+    board_rot90_flipud = Board(b_rot90_flipud)
+
+    qtable.update_q_value(board_rot90_flipud, 2, 0.8)
+    qtable.update_q_value(board_rot90_flipud, 7, 0.7)
+
+    assert len(qtable.qtable.cache) == 1
+
+    expected_qvalues = {1: init, 2: init, 5: 0.7, 6: 0.8}
+
+    qvalues = qtable.get_q_values(board)
+
+    assert qvalues == expected_qvalues
+
+    expected_qvalues = {2: 0.8, 3: init, 6: init, 7: 0.7}
+
+    qvalues = qtable.get_q_values(board_rot90_flipud)
+
+    assert qvalues == expected_qvalues

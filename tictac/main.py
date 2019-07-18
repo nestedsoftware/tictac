@@ -41,12 +41,10 @@ print("")
 
 print("Training qtable X vs. random and minimax random...")
 play_training_games_x(q_tables=qtables,
-                      o_strategies=[play_random_move,
-                                    play_minimax_move_randomized])
+                      o_strategies=[play_random_move])
 print("Training qtable O vs. random and minimax random...")
 play_training_games_o(q_tables=qtables,
-                      x_strategies=[play_random_move,
-                                    play_minimax_move_randomized])
+                      x_strategies=[play_random_move])
 print("")
 
 play_q_table_move = create_q_table_player(qtables)
@@ -80,3 +78,5 @@ print("Playing qtable vs qtable:")
 print("-------------------------")
 play_games(1000, play_q_table_move, play_q_table_move)
 print("")
+
+print(f"number of items in qtable = {len(qtables[0].qtable.cache)}")
