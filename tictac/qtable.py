@@ -6,11 +6,9 @@ import itertools
 from collections import deque
 
 from tictac.board import BoardCache, Board
-from tictac.board import play_game
+from tictac.board import play_game, play_random_move
 from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
                           RESULT_X_WINS, RESULT_O_WINS, RESULT_DRAW)
-
-from tictac.minimax import create_minimax_player
 
 WIN_VALUE = 1.0
 DRAW_VALUE = 0.0
@@ -18,8 +16,6 @@ LOSS_VALUE = -1.0
 
 INITIAL_Q_VALUES_FOR_X = 0.0
 INITIAL_Q_VALUES_FOR_O = 0.0
-
-play_minimax_move_randomized = create_minimax_player(True)
 
 
 class QTable:
@@ -149,7 +145,7 @@ def play_training_games_x(total_games=6000, q_tables=None,
     if q_tables is None:
         q_tables = qtables
     if o_strategies is None:
-        o_strategies = [play_minimax_move_randomized]
+        o_strategies = [play_random_move]
 
     play_training_games(total_games, q_tables, CELL_X, learning_rate,
                         discount_factor, epsilon, None, o_strategies)
@@ -161,7 +157,7 @@ def play_training_games_o(total_games=6000, q_tables=None,
     if q_tables is None:
         q_tables = qtables
     if x_strategies is None:
-        x_strategies = [play_minimax_move_randomized]
+        x_strategies = [play_random_move]
 
     play_training_games(total_games, q_tables, CELL_O, learning_rate,
                         discount_factor, epsilon, x_strategies, None)
@@ -213,10 +209,11 @@ def play_training_game(q_tables, move_history, q_table_player, x_strategy,
 def update_training_gameover(q_tables, move_history, q_table_player, board,
                              learning_rate, discount_factor):
     new_q_value = get_game_result_value(q_table_player, board)
-    next_position, move = move_history[0]
+    # move history is in reverse-chronological order - last to first
+    next_position, move_index = move_history[0]
 
     for q_table in q_tables:
-        q_table.update_q_value(next_position, move, new_q_value)
+        q_table.update_q_value(next_position, move_index, new_q_value)
 
     for (position, move_index) in list(move_history)[1:]:
         q_tables = get_shuffled_q_tables(q_tables)
