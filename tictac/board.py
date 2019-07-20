@@ -73,7 +73,7 @@ def is_empty(values):
 class Board:
     def __init__(self, board=None):
         if board is None:
-            self.board = new_board
+            self.board = np.copy(new_board)
         else:
             self.board = board
 

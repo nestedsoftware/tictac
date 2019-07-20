@@ -114,7 +114,8 @@ def test_play_training_game_x_player():
     init = INITIAL_Q_VALUES_FOR_X
     first_board = np.copy(new_board)
 
-    expected_move_indexes_and_q_values = {0: 0.81, 1: init, 2: init,
+    val = 0.9 * 0.81
+    expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
                                           3: init, 4: init, 5: init,
                                           6: init, 7: init, 8: init}
 
@@ -126,7 +127,8 @@ def test_play_training_game_x_player():
     second_board[0] = CELL_X
     second_board[7] = CELL_O
 
-    expected_move_indexes_and_q_values = {1: 0.9, 2: init,
+    val = 0.9 * 0.9
+    expected_move_indexes_and_q_values = {1: val, 2: init,
                                           3: init, 4: init, 5: init,
                                           6: init, 8: init}
 
@@ -138,7 +140,8 @@ def test_play_training_game_x_player():
     third_board[1] = CELL_X
     third_board[5] = CELL_O
 
-    expected_move_indexes_and_q_values = {2: 1.0,
+    val = 0.9 * 1.0
+    expected_move_indexes_and_q_values = {2: val,
                                           3: init, 4: init,
                                           6: init, 8: init}
 
@@ -161,8 +164,8 @@ def test_play_training_game_o_player():
     first_board = np.copy(new_board)
     first_board[6] = CELL_X
 
-    qvalue = 0.81
-    expected_move_indexes_and_q_values = {0: qvalue, 1: init, 2: init,
+    val = 0.9 * 0.81
+    expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
                                           3: init, 4: init, 5: init,
                                           7: init, 8: init}
 
@@ -174,8 +177,8 @@ def test_play_training_game_o_player():
     second_board[0] = CELL_O
     second_board[8] = CELL_X
 
-    qvalue = 0.9
-    expected_move_indexes_and_q_values = {1: qvalue, 2: init,
+    val = 0.9 * 0.9
+    expected_move_indexes_and_q_values = {1: val,  2: init,
                                           3: init, 4: init, 5: init,
                                           7: init}
 
@@ -187,7 +190,8 @@ def test_play_training_game_o_player():
     third_board[1] = CELL_O
     third_board[5] = CELL_X
 
-    expected_move_indexes_and_q_values = {2: 1.0,
+    val = 0.9 * 1.0
+    expected_move_indexes_and_q_values = {2: val,
                                           3: init, 4: init,
                                           7: init}
 

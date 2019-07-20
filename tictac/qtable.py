@@ -208,12 +208,15 @@ def play_training_game(q_tables, move_history, q_table_player, x_strategy,
 
 def update_training_gameover(q_tables, move_history, q_table_player, board,
                              learning_rate, discount_factor):
-    new_q_value = get_game_result_value(q_table_player, board)
+    game_result_value = get_game_result_value(q_table_player, board)
 
     # move history is in reverse-chronological order - last to first
     next_position, move_index = move_history[0]
 
     for q_table in q_tables:
+        current_q_value = q_table.get_q_value(next_position, move_index)
+        new_q_value = ((1 - learning_rate) * current_q_value
+                       + learning_rate * discount_factor * game_result_value)
         q_table.update_q_value(next_position, move_index, new_q_value)
 
     for (position, move_index) in list(move_history)[1:]:
@@ -230,7 +233,6 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
 
         new_q_value = ((1 - learning_rate) * current_q_value
                        + learning_rate * discount_factor * max_next_q_value)
-
         current_q_table.update_q_value(position, move_index, new_q_value)
 
         next_position = position
