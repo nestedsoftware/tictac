@@ -209,6 +209,7 @@ def play_training_game(q_tables, move_history, q_table_player, x_strategy,
 def update_training_gameover(q_tables, move_history, q_table_player, board,
                              learning_rate, discount_factor):
     new_q_value = get_game_result_value(q_table_player, board)
+
     # move history is in reverse-chronological order - last to first
     next_position, move_index = move_history[0]
 
