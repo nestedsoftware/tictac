@@ -217,8 +217,7 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
         q_table.update_q_value(next_position, move_index, new_q_value)
 
     for (position, move_index) in list(move_history)[1:]:
-        shuffled_q_tables = get_shuffled_q_tables(q_tables)
-        q_tables_cycle = itertools.cycle(shuffled_q_tables)
+        q_tables_cycle = get_shuffled_q_tables(q_tables)
         current_q_table = next(q_tables_cycle)
 
         current_q_value = current_q_table.get_q_value(position, move_index)
@@ -240,7 +239,8 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
 def get_shuffled_q_tables(q_tables):
     q_tables_copy = q_tables.copy()
     random.shuffle(q_tables_copy)
-    return q_tables_copy
+    q_tables_cycle = itertools.cycle(q_tables_copy)
+    return q_tables_cycle
 
 
 def create_training_player(q_tables, move_history, epsilon):
