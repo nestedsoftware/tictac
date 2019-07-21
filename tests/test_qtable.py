@@ -149,6 +149,71 @@ def test_play_training_game_x_player():
 
     assert move_indexes_and_q_values == expected_move_indexes_and_q_values
 
+    move_history = deque()
+    x_strategy = create_training_player([q_table], move_history, 0)
+    play_training_game([q_table], move_history, q_table_player, x_strategy,
+                       o_strategy, 0.9, 1)
+
+    init = INITIAL_Q_VALUES_FOR_X
+    first_board = np.copy(new_board)
+
+    val = 0.1 * (0.81 * 0.9) + 0.9 * (0.9 * (0.9 * 0.81))
+    expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
+                                          3: init, 4: init, 5: init,
+                                          6: init, 7: init, 8: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    second_board = np.copy(first_board)
+    second_board[0] = CELL_X
+    second_board[1] = CELL_O
+
+    val = 0.9 * (0.9 * 0.81)
+    expected_move_indexes_and_q_values = {2: val,
+                                          3: init, 4: init, 5: init,
+                                          6: init, 7: init, 8: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(second_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    third_board = np.copy(second_board)
+    third_board[2] = CELL_X
+    third_board[5] = CELL_O
+
+    val = 0.9 * 0.81
+    expected_move_indexes_and_q_values = {3: val, 4: init,
+                                          6: init, 7: init, 8: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(third_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    fourth_board = np.copy(third_board)
+    fourth_board[3] = CELL_X
+    fourth_board[8] = CELL_O
+
+    val = 0.81
+    expected_move_indexes_and_q_values = {4: val,
+                                          6: init, 7: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(fourth_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    fifth_board = np.copy(fourth_board)
+    fifth_board[4] = CELL_X
+    fifth_board[7] = CELL_O
+
+    val = 0.9
+    expected_move_indexes_and_q_values = {6: val}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(fifth_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
 
 def test_play_training_game_o_player():
     q_table = QTable()
@@ -196,6 +261,37 @@ def test_play_training_game_o_player():
                                           7: init}
 
     move_indexes_and_q_values = q_table.get_q_values(Board(third_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    move_history = deque()
+    o_strategy = create_training_player([q_table], move_history, 0)
+    play_training_game([q_table], move_history, q_table_player, x_strategy,
+                       o_strategy, 0.9, 1)
+
+    init = INITIAL_Q_VALUES_FOR_O
+    first_board = np.copy(new_board)
+    first_board[0] = CELL_X
+
+    val = (1 - 0.9) * (0.9 * 0.81) + (0.9 * 0.0)
+    expected_move_indexes_and_q_values = {1: init,  2: val,
+                                          3: init, 4: init, 5: init,
+                                          6: init, 7: init, 8: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
+
+    assert move_indexes_and_q_values == expected_move_indexes_and_q_values
+
+    second_board = np.copy(first_board)
+    second_board[2] = CELL_O
+    second_board[4] = CELL_X
+
+    val = 0.9 * -1
+    expected_move_indexes_and_q_values = {1: val,
+                                          3: init, 5: init,
+                                          6: init, 7: init, 8: init}
+
+    move_indexes_and_q_values = q_table.get_q_values(Board(second_board))
 
     assert move_indexes_and_q_values == expected_move_indexes_and_q_values
 
