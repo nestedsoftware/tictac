@@ -219,17 +219,15 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
         q_table.update_q_value(next_position, move_index, new_q_value)
 
     for (position, move_index) in list(move_history)[1:]:
-        q_tables_cycle = get_shuffled_q_tables(q_tables)
-        current_q_table = next(q_tables_cycle)
+        current_q_table, next_q_table = get_shuffled_q_tables(q_tables)
 
-        current_q_value = current_q_table.get_q_value(position, move_index)
         max_next_move_index, _ = current_q_table.get_move_index_and_max_q_value(
             next_position)
 
-        next_q_table = next(q_tables_cycle)
         max_next_q_value = next_q_table.get_q_value(next_position,
                                                     max_next_move_index)
 
+        current_q_value = current_q_table.get_q_value(position, move_index)
         new_q_value = (((1 - learning_rate) * current_q_value)
                        + (learning_rate * discount_factor * max_next_q_value))
         current_q_table.update_q_value(position, move_index, new_q_value)
@@ -241,7 +239,11 @@ def get_shuffled_q_tables(q_tables):
     q_tables_copy = q_tables.copy()
     random.shuffle(q_tables_copy)
     q_tables_cycle = itertools.cycle(q_tables_copy)
-    return q_tables_cycle
+
+    current_q_table = next(q_tables_cycle)
+    next_q_table = next(q_tables_cycle)
+
+    return current_q_table, next_q_table
 
 
 def create_training_player(q_tables, move_history, epsilon):
