@@ -182,3 +182,6 @@ def get_symbol(cell):
     if cell == CELL_O:
         return 'O'
     return '-'
+
+def is_draw(board):
+    return board.get_game_result() == RESULT_DRAW

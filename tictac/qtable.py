@@ -6,9 +6,9 @@ import itertools
 from collections import deque
 
 from tictac.board import BoardCache, Board
-from tictac.board import play_game, play_random_move
+from tictac.board import play_game, play_random_move, is_draw
 from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
-                          RESULT_X_WINS, RESULT_O_WINS, RESULT_DRAW)
+                          RESULT_X_WINS, RESULT_O_WINS)
 
 WIN_VALUE = 1.0
 DRAW_VALUE = 0.0
@@ -274,7 +274,3 @@ def is_loss(player, board):
     result = board.get_game_result()
     return ((player == CELL_O and result == RESULT_X_WINS)
             or (player == CELL_X and result == RESULT_O_WINS))
-
-
-def is_draw(board):
-    return board.get_game_result() == RESULT_DRAW
