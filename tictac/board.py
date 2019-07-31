@@ -183,5 +183,6 @@ def get_symbol(cell):
         return 'O'
     return '-'
 
+
 def is_draw(board):
     return board.get_game_result() == RESULT_DRAW
