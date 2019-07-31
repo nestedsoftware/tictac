@@ -17,14 +17,15 @@ class Node:
         if self.visits == 0:
             return 0
 
-        percentage_wins = float(self.wins + self.draws)/self.visits
-        return percentage_wins
+        percentage_success = (self.wins + self.draws)/self.visits
+        return percentage_success
 
 
-def play_mcts_move(board, node_cache=nodecache, num_playouts=10):
+def play_mcts_move(board, node_cache=nodecache, num_playouts=0):
+    # allows for online playouts (e.g. if we don't use a separate training step)
     perform_training_playouts(node_cache, board, num_playouts)
-    move_index_node_pairs = get_move_index_node_pairs(board, node_cache)
 
+    move_index_node_pairs = get_move_index_node_pairs(board, node_cache)
     move_index_to_play = max(move_index_node_pairs,
                              key=lambda pair: pair[1].value())[0]
     return board.play_move(move_index_to_play)
@@ -41,33 +42,32 @@ def get_move_index_node_pairs(board, node_cache):
 
 
 def perform_training_playouts(node_cache=nodecache, board=Board(),
-                              num_playouts=30000):
+                              num_playouts=40000, display_progress=False):
     for game in range(num_playouts):
         perform_game_playout(node_cache, board)
-
-        # if (game+1) % (num_playouts / 10) == 0:
-        #     print(f"{game+1} playouts...")
+        if display_progress is True and (game+1) % (num_playouts / 10) == 0:
+            print(f"{game+1}/{num_playouts} playouts...")
 
 
 def perform_game_playout(node_cache, board):
-    game_history = []
+    game_history = [board]
+    parent_node = find_or_create_node(node_cache, board)
+    parent_node.visits += 1
 
     while not board.is_gameover():
-        parent_node = find_or_create_node(node_cache, board)
-        parent_node.visits += 1
         move_index_node_pairs = find_or_create_child_nodes(node_cache, board)
         move_index = choose_node(parent_node, move_index_node_pairs)
         board = board.play_move(move_index)
         game_history.append(board)
+        node = find_or_create_node(node_cache, board)
+        node.visits += 1
+        parent_node = node
 
-    final_node = find_or_create_node(node_cache, board)
-    final_node.visits += 1
     backpropagate(node_cache, board, game_history)
 
 
 def choose_node(parent_node, move_index_node_pairs):
     move_value_pairs = calculate_values(parent_node, move_index_node_pairs)
-
     return max(move_value_pairs, key=lambda pair: pair[1])[0]
 
 
@@ -83,9 +83,9 @@ def calculate_value(parent_node, node):
     if node.visits == 0:
         return math.inf
 
-    value = (node.value()
-             + (math.sqrt(2.0)
-             * math.sqrt(math.log(parent_node.visits) / node.visits)))
+    exploration_term = (math.sqrt(2.0)
+                        * math.sqrt(math.log(parent_node.visits) / node.visits))
+    value = node.value() + exploration_term
 
     return value
 

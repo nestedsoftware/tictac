@@ -181,7 +181,7 @@ def play_training_games(total_games, q_tables, q_table_player, learning_rate,
 
         if (game+1) % (total_games / 10) == 0:
             epsilon = max(0, epsilon - 0.1)
-            print(f"played {game+1} games, using epsilon={epsilon}...")
+            print(f"{game+1}/{total_games} games, using epsilon={epsilon}...")
 
 
 def get_strategies_to_use(q_tables,  move_history, x_strategies, o_strategies,

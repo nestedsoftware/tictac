@@ -3,7 +3,7 @@ from tictac.board import play_random_move
 from tictac.minimax import create_minimax_player
 from tictac.qtable import (qtables, play_training_games_x,
                            play_training_games_o, create_q_table_player)
-from tictac.mcts import play_mcts_move
+from tictac.mcts import play_mcts_move, perform_training_playouts
 
 play_minimax_move_randomized = create_minimax_player(True)
 play_minimax_move_not_randomized = create_minimax_player(False)
@@ -79,9 +79,12 @@ print("Playing qtable vs qtable:")
 print("-------------------------")
 play_games(1000, play_q_table_move, play_q_table_move)
 print("")
-
 print(f"number of items in qtable = {len(qtables[0].qtable.cache)}")
+print("")
 
+print("Training MCTS...")
+perform_training_playouts(display_progress=True)
+print("")
 print("Playing random vs MCTS:")
 print("-----------------------")
 play_games(1000, play_random_move, play_mcts_move)
@@ -94,7 +97,6 @@ print("Playing minimax random vs MCTS:")
 print("-------------------------------")
 play_games(1000, play_minimax_move_randomized, play_mcts_move)
 print("")
-
 print("Playing MCTS vs random:")
 print("-----------------------")
 play_games(1000, play_mcts_move, play_random_move)
@@ -106,4 +108,8 @@ print("")
 print("Playing MCTS vs minimax random:")
 print("-------------------------------")
 play_games(1000, play_mcts_move, play_minimax_move_randomized)
+print("")
+print("Playing MCTS vs minimax MCTS:")
+print("-----------------------------")
+play_games(1000, play_mcts_move, play_mcts_move)
 print("")
