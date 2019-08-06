@@ -83,7 +83,7 @@ print(f"number of items in qtable = {len(qtables[0].qtable.cache)}")
 print("")
 
 print("Training MCTS...")
-perform_training_playouts(display_progress=True)
+perform_training_playouts()
 print("")
 print("Playing random vs MCTS:")
 print("-----------------------")

@@ -32,10 +32,7 @@ class Node:
         return percentage_success
 
 
-def play_mcts_move(board, node_cache=nodecache, num_playouts=0):
-    # allows for online playouts (e.g. if we don't use a separate training step)
-    perform_training_playouts(node_cache, board, num_playouts)
-
+def play_mcts_move(board, node_cache=nodecache):
     move_index_node_pairs = get_move_index_node_pairs(board, node_cache)
     move_index_to_play = max(move_index_node_pairs,
                              key=lambda pair: pair[1].value())[0]
@@ -50,7 +47,7 @@ def get_move_index_node_pairs(board, node_cache):
 
 
 def perform_training_playouts(node_cache=nodecache, board=Board(),
-                              num_playouts=4000, display_progress=False):
+                              num_playouts=4000, display_progress=True):
     for game in range(num_playouts):
         perform_game_playout(node_cache, board)
         if display_progress is True and (game+1) % (num_playouts / 10) == 0:
@@ -88,6 +85,9 @@ def calculate_value(node_cache, parent_board, board):
         return math.inf
 
     parent_node_visits = node.get_total_visits_for_parent_nodes()
+
+    assert node.visits <= parent_node_visits, \
+        "child node visits should be a subset of visits to the parent node "
 
     exploration_term = (math.sqrt(2.0)
                         * math.sqrt(math.log(parent_node_visits) / node.visits))
