@@ -11,7 +11,7 @@ from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
                           RESULT_X_WINS, RESULT_O_WINS)
 
 WIN_VALUE = 1.0
-DRAW_VALUE = 0.0
+DRAW_VALUE = 0.5
 LOSS_VALUE = -1.0
 
 INITIAL_Q_VALUES_FOR_X = 0.0
