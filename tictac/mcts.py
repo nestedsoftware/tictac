@@ -1,5 +1,6 @@
 import math
 
+from tictac.board import play_game
 from tictac.board import (Board, BoardCache, CELL_X, CELL_O, RESULT_X_WINS,
                           RESULT_O_WINS, is_draw)
 
@@ -31,6 +32,17 @@ class Node:
         percentage_success = (self.wins + self.draws) / self.visits
         return percentage_success
 
+
+def play_game_and_reset_playouts(x_strategy, o_strategy, node_cache=nodecache):
+    node_cache.reset()
+    board = play_game(x_strategy, o_strategy)
+    node_cache.reset()
+    return board
+
+def play_mcts_move_with_live_playouts(board, node_cache=nodecache, num_playouts=200):
+    perform_training_playouts(node_cache, board, num_playouts,
+                              display_progress=False)
+    return play_mcts_move(board, node_cache)
 
 def play_mcts_move(board, node_cache=nodecache):
     move_index_node_pairs = get_move_index_node_pairs(board, node_cache)

@@ -25,7 +25,18 @@ RESULT_NOT_OVER = 2
 new_board = np.array([CELL_EMPTY] * BOARD_SIZE ** 2)
 
 
-def play_games(total_games, x_strategy, o_strategy):
+def play_game(x_strategy, o_strategy):
+    board = Board()
+    player_strategies = itertools.cycle([x_strategy, o_strategy])
+
+    while not board.is_gameover():
+        play = next(player_strategies)
+        board = play(board)
+
+    return board
+
+
+def play_games(total_games, x_strategy, o_strategy, play_single_game=play_game):
     results = {
         RESULT_X_WINS: 0,
         RESULT_O_WINS: 0,
@@ -33,7 +44,7 @@ def play_games(total_games, x_strategy, o_strategy):
     }
 
     for g in range(total_games):
-        end_of_game = (play_game(x_strategy, o_strategy))
+        end_of_game = (play_single_game(x_strategy, o_strategy))
         result = end_of_game.get_game_result()
         results[result] += 1
 
@@ -44,17 +55,6 @@ def play_games(total_games, x_strategy, o_strategy):
     print(f"x wins: {x_wins_percent:.2f}%")
     print(f"o wins: {o_wins_percent:.2f}%")
     print(f"draw  : {draw_percent:.2f}%")
-
-
-def play_game(x_strategy, o_strategy):
-    board = Board()
-    player_strategies = itertools.cycle([x_strategy, o_strategy])
-
-    while not board.is_gameover():
-        play = next(player_strategies)
-        board = play(board)
-
-    return board
 
 
 def play_random_move(board):

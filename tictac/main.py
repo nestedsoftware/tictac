@@ -3,7 +3,11 @@ from tictac.board import play_random_move
 from tictac.minimax import create_minimax_player
 from tictac.qtable import (qtables, play_training_games_x,
                            play_training_games_o, create_q_table_player)
+
 from tictac.mcts import play_mcts_move, perform_training_playouts
+
+# from tictac.mcts import (play_game_and_reset_playouts,
+#                          play_mcts_move_with_live_playouts, nodecache)
 
 play_minimax_move_randomized = create_minimax_player(True)
 play_minimax_move_not_randomized = create_minimax_player(False)
@@ -109,7 +113,46 @@ print("Playing MCTS vs minimax random:")
 print("-------------------------------")
 play_games(1000, play_mcts_move, play_minimax_move_randomized)
 print("")
-print("Playing MCTS vs minimax MCTS:")
-print("-----------------------------")
+print("Playing MCTS vs MCTS:")
+print("---------------------")
 play_games(1000, play_mcts_move, play_mcts_move)
 print("")
+
+# You can uncomment the code below to run MCTS in online mode
+# print("Running MCTS in online mode, but may take a while...")
+# print("")
+# print("Playing random vs MCTS:")
+# print("-----------------------")
+# play_games(100, play_random_move, play_mcts_move_with_live_playouts,
+#            play_game_and_reset_playouts)
+# print("")
+# print("Playing minimax vs MCTS:")
+# print("------------------------")
+# play_games(100, play_minimax_move_not_randomized,
+#            play_mcts_move_with_live_playouts, play_game_and_reset_playouts)
+# print("")
+# print("Playing minimax random vs MCTS:")
+# print("-------------------------------")
+# play_games(100, play_minimax_move_randomized, play_mcts_move_with_live_playouts,
+#            play_game_and_reset_playouts)
+# print("")
+# print("Playing MCTS vs random:")
+# print("-----------------------")
+# play_games(100, play_mcts_move_with_live_playouts, play_random_move,
+#            play_game_and_reset_playouts)
+# print("")
+# print("Playing MCTS vs minimax:")
+# print("------------------------")
+# play_games(100, play_mcts_move_with_live_playouts, play_minimax_move_not_randomized,
+#            play_game_and_reset_playouts)
+# print("")
+# print("Playing MCTS vs minimax random:")
+# print("-------------------------------")
+# play_games(100, play_mcts_move_with_live_playouts, play_minimax_move_randomized,
+#            play_game_and_reset_playouts)
+# print("")
+# print("Playing MCTS vs MCTS:")
+# print("---------------------")
+# play_games(100, play_mcts_move_with_live_playouts,
+#            play_mcts_move_with_live_playouts, play_game_and_reset_playouts)
+# print("")
