@@ -29,8 +29,8 @@ class Node:
         if self.visits == 0:
             return 0
 
-        percentage_success = (self.wins + self.draws) / self.visits
-        return percentage_success
+        success_percentage = (self.wins + self.draws) / self.visits
+        return success_percentage
 
 
 def play_game_and_reset_playouts(x_strategy, o_strategy, node_cache=nodecache):
