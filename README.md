@@ -14,9 +14,9 @@ Latest results:
 C:\Dev\python\tictac>python -m tictac.main
 Playing random vs random:
 -------------------------
-x wins: 58.80%
-o wins: 29.00%
-draw  : 12.20%
+x wins: 60.10%
+o wins: 28.90%
+draw  : 11.00%
 
 Playing minimax not random vs minimax random:
 ---------------------------------------------
@@ -44,15 +44,15 @@ draw  : 100.00%
 
 Playing minimax random vs random:
 ---------------------------------
-x wins: 97.60%
+x wins: 96.80%
 o wins: 0.00%
-draw  : 2.40%
+draw  : 3.20%
 
 Playing random vs minimax random:
 ---------------------------------
 x wins: 0.00%
-o wins: 78.70%
-draw  : 21.30%
+o wins: 78.10%
+draw  : 21.90%
 
 Training qtable X vs. random...
 700/7000 games, using epsilon=0.6...
@@ -79,9 +79,9 @@ Training qtable O vs. random...
 
 Playing qtable vs random:
 -------------------------
-x wins: 99.60%
+x wins: 95.40%
 o wins: 0.00%
-draw  : 0.40%
+draw  : 4.60%
 
 Playing qtable vs minimax random:
 ---------------------------------
@@ -98,8 +98,8 @@ draw  : 100.00%
 Playing random vs qtable:
 -------------------------
 x wins: 0.00%
-o wins: 91.00%
-draw  : 9.00%
+o wins: 78.10%
+draw  : 21.90%
 
 Playing minimax random vs qtable:
 ---------------------------------
@@ -119,7 +119,7 @@ x wins: 0.00%
 o wins: 0.00%
 draw  : 100.00%
 
-number of items in qtable = 626
+number of items in qtable = 624
 
 Training MCTS...
 400/4000 playouts...
@@ -136,8 +136,8 @@ Training MCTS...
 Playing random vs MCTS:
 -----------------------
 x wins: 0.00%
-o wins: 61.00%
-draw  : 39.00%
+o wins: 63.50%
+draw  : 36.50%
 
 Playing minimax vs MCTS:
 ------------------------
@@ -153,9 +153,9 @@ draw  : 100.00%
 
 Playing MCTS vs random:
 -----------------------
-x wins: 83.40%
+x wins: 81.80%
 o wins: 0.00%
-draw  : 16.60%
+draw  : 18.20%
 
 Playing MCTS vs minimax:
 ------------------------
