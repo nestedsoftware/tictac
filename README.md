@@ -4,8 +4,8 @@ Code requires python 3, numpy, and pytest.
 
 Install using pipenv:
 
-* pipenv shell
-* pipenv install --dev
+* `pipenv shell`
+* `pipenv install --dev`
 
 Make sure to set `PYTHONPATH` to main project directory: 
 
@@ -14,8 +14,8 @@ Make sure to set `PYTHONPATH` to main project directory:
 
 Run tests and demo:
 
-* Run tests: `$ pytest`
-* Run demo: `$ python -m tictac.main`
+* Run tests: `pytest`
+* Run demo: `python -m tictac.main`
 
 Below are the most recent demo results. The current qtable agent plays near-perfect games as O against itself, minimax, and random. Getting good result for the X player was pretty straightforward, but for O it took quite a bit of fiddling with the hyperparameters.
 
