@@ -35,22 +35,20 @@ class QTable:
             qvalue, _ = result
             return qvalue
 
-        q_value = get_initial_q_value(new_position)
-        self.qtable.set_for_position(new_position, q_value)
-        return q_value
+        return get_initial_q_value(new_position)
 
     def update_q_value(self, board, move_index, qvalue):
         new_position = board.play_move(move_index)
 
         result, found = self.qtable.get_for_position(new_position)
-        if found is False:
-            self.qtable.set_for_position(new_position, qvalue)
+        if found is True:
+            _, t = result
+            new_position_transformed = Board(
+                t.transform(new_position.board_2d).flatten())
+            self.qtable.set_for_position(new_position_transformed, qvalue)
             return
 
-        _, t = result
-        new_position_transformed = Board(
-            t.transform(new_position.board_2d).flatten())
-        self.qtable.set_for_position(new_position_transformed, qvalue)
+        self.qtable.set_for_position(new_position, qvalue)
 
     def get_move_index_and_max_q_value(self, board):
         q_values = self.get_q_values(board)
@@ -181,8 +179,9 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
     next_position, move_index = move_history[0]
     for q_table in q_tables:
         current_q_value = q_table.get_q_value(next_position, move_index)
-        new_q_value = (((1 - learning_rate) * current_q_value)
-                       + (learning_rate * discount_factor * game_result_reward))
+        new_q_value = calculate_new_q_value(current_q_value, game_result_reward,
+                                            0.0, learning_rate, discount_factor)
+
         q_table.update_q_value(next_position, move_index, new_q_value)
 
     for (position, move_index) in list(move_history)[1:]:
@@ -195,11 +194,20 @@ def update_training_gameover(q_tables, move_history, q_table_player, board,
                                                     max_next_move_index)
 
         current_q_value = current_q_table.get_q_value(position, move_index)
-        new_q_value = (((1 - learning_rate) * current_q_value)
-                       + (learning_rate * discount_factor * max_next_q_value))
+        new_q_value = calculate_new_q_value(current_q_value, 0.0,
+                                            max_next_q_value, learning_rate,
+                                            discount_factor)
         current_q_table.update_q_value(position, move_index, new_q_value)
 
         next_position = position
+
+
+def calculate_new_q_value(current_q_value, reward, max_next_q_value,
+                          learning_rate, discount_factor):
+    weighted_prior_values = (1 - learning_rate) * current_q_value
+    weighted_new_value = (learning_rate
+                          * (reward + discount_factor * max_next_q_value))
+    return weighted_prior_values + weighted_new_value
 
 
 def get_shuffled_q_tables(q_tables):

@@ -345,7 +345,7 @@ def test_update_q_value():
     qtable.update_q_value(board_rot90_flipud, 2, 0.8)
     qtable.update_q_value(board_rot90_flipud, 7, 0.7)
 
-    assert len(qtable.qtable.cache) == 4
+    assert len(qtable.qtable.cache) == 2
 
     expected_qvalues = {1: init, 2: init, 5: 0.7, 6: 0.8}
 
