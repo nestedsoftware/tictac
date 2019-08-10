@@ -7,7 +7,12 @@ from collections import deque
 
 from tictac.board import BoardCache, Board
 from tictac.board import play_game, play_random_move, is_draw
-from tictac.board import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS)
+from tictac.board import (BOARD_SIZE, BOARD_DIMENSIONS, CELL_X, CELL_O,
+                          RESULT_X_WINS, RESULT_O_WINS)
+
+# Contains old version of code that required transforming/reverse-transforming
+# qvalues. The new version stores the board position after each action as a
+# separate key associated with a single key value instead.
 
 WIN_VALUE = 1.0
 DRAW_VALUE = 1.0
@@ -22,35 +27,36 @@ class QTable:
         self.qtable = BoardCache()
 
     def get_q_values(self, board):
-        move_indexes = board.get_valid_move_indexes()
-        qvalues = [self.get_q_value(board, mi) for mi
-                   in board.get_valid_move_indexes()]
+        result, found = self.qtable.get_for_position(board)
+        if found:
+            qvalues, transform = result
+            return reverse_transform_qvalues(qvalues, transform)
 
-        return dict(zip(move_indexes, qvalues))
+        valid_move_indexes = board.get_valid_move_indexes()
+        initial_q_value = get_initial_q_value(board)
+        initial_q_values = [initial_q_value for _ in valid_move_indexes]
+
+        qvalues = dict(zip(valid_move_indexes, initial_q_values))
+
+        self.qtable.set_for_position(board, qvalues)
+
+        return qvalues
 
     def get_q_value(self, board, move_index):
-        new_position = board.play_move(move_index)
-        result, found = self.qtable.get_for_position(new_position)
-        if found is True:
-            qvalue, _ = result
-            return qvalue
-
-        q_value = get_initial_q_value(new_position)
-        self.qtable.set_for_position(new_position, q_value)
-        return q_value
+        return self.get_q_values(board)[move_index]
 
     def update_q_value(self, board, move_index, qvalue):
-        new_position = board.play_move(move_index)
+        qvalues = self.get_q_values(board)
+        qvalues[move_index] = qvalue
 
-        result, found = self.qtable.get_for_position(new_position)
-        if found is False:
-            self.qtable.set_for_position(new_position, qvalue)
-            return
+        result, found = self.qtable.get_for_position(board)
+        assert found is True, "position must be cached at this point"
+        _, transform = result
 
-        _, t = result
-        new_position_transformed = Board(
-            t.transform(new_position.board_2d).flatten())
-        self.qtable.set_for_position(new_position_transformed, qvalue)
+        transformed_board, transformed_qvalues = transform_board_and_qvalues(
+            board, qvalues, transform)
+
+        self.qtable.set_for_position(transformed_board, transformed_qvalues)
 
     def get_move_index_and_max_q_value(self, board):
         q_values = self.get_q_values(board)
@@ -58,8 +64,39 @@ class QTable:
 
 
 def get_initial_q_value(board):
-    return (INITIAL_Q_VALUES_FOR_X if board.get_turn() == CELL_O
+    return (INITIAL_Q_VALUES_FOR_X if board.get_turn() == CELL_X
             else INITIAL_Q_VALUES_FOR_O)
+
+
+def transform_board_and_qvalues(board, q_values, transform):
+    b_2d_transformed = transform.transform(board.board_2d)
+
+    q_2d = load_q_values_into_2d_board(q_values)
+    q_2d_transformed = transform.transform(q_2d)
+    q_values_transformed = dict([(mi, qv) for (mi, qv)
+                                 in enumerate(q_2d_transformed.flatten())
+                                 if not np.isnan(qv)])
+
+    return Board(b_2d_transformed.flatten()), q_values_transformed
+
+
+def reverse_transform_qvalues(qvalues, transform):
+    qvalues_2d = load_q_values_into_2d_board(qvalues)
+
+    qvalues_2d_transform_reversed = transform.reverse(qvalues_2d)
+
+    return dict([(index, qvalue) for index, qvalue
+                 in enumerate(qvalues_2d_transform_reversed.flatten())
+                 if not np.isnan(qvalue)])
+
+
+def load_q_values_into_2d_board(qvalues):
+    b = np.empty(BOARD_SIZE**2)
+    b[:] = np.nan
+    for move_index, qvalue in qvalues.items():
+        b[move_index] = qvalue
+
+    return b.reshape(BOARD_DIMENSIONS)
 
 
 qtables = [QTable()]

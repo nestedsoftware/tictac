@@ -55,12 +55,12 @@ def test_choose_move_index_1st_move():
     board = Board(b)
 
     q_table = QTable()
-    q_table.update_q_value(board, 0, 1)
-    q_table.update_q_value(board, 1, 0.5)
+    q_table.update_q_value(board, 1, 1)
+    q_table.update_q_value(board, 2, 0.5)
 
     move_index = choose_move_index([q_table], board, 0)
 
-    assert move_index == 0
+    assert move_index == 1
 
 
 def test_choose_move_index_2nd_move():
@@ -115,9 +115,9 @@ def test_play_training_game_x_player():
     first_board = np.copy(new_board)
 
     val = 0.9 * 0.81
-    expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
+    expected_move_indexes_and_q_values = {0: val,  1: init, 2: val,
                                           3: init, 4: init, 5: init,
-                                          6: init, 7: init, 8: init}
+                                          6: val,  7: init, 8: val}
 
     move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
 
@@ -158,9 +158,9 @@ def test_play_training_game_x_player():
     first_board = np.copy(new_board)
 
     val = 0.1 * (0.81 * 0.9) + 0.9 * (0.9 * (0.9 * 0.81))
-    expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
+    expected_move_indexes_and_q_values = {0: val,  1: init, 2: val,
                                           3: init, 4: init, 5: init,
-                                          6: init, 7: init, 8: init}
+                                          6: val,  7: init, 8: val}
 
     move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
 
@@ -232,7 +232,7 @@ def test_play_training_game_o_player():
     val = 0.9 * 0.81
     expected_move_indexes_and_q_values = {0: val,  1: init, 2: init,
                                           3: init, 4: init, 5: init,
-                                          7: init, 8: init}
+                                          7: init, 8: val}
 
     move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
 
@@ -274,9 +274,9 @@ def test_play_training_game_o_player():
     first_board[0] = CELL_X
 
     val = (1 - 0.9) * (0.9 * 0.81) + (0.9 * 0.0)
-    expected_move_indexes_and_q_values = {1: init,  2: val,
+    expected_move_indexes_and_q_values = {1: init, 2: val,
                                           3: init, 4: init, 5: init,
-                                          6: init, 7: init, 8: init}
+                                          6: val,  7: init, 8: init}
 
     move_indexes_and_q_values = q_table.get_q_values(Board(first_board))
 
@@ -345,7 +345,7 @@ def test_update_q_value():
     qtable.update_q_value(board_rot90_flipud, 2, 0.8)
     qtable.update_q_value(board_rot90_flipud, 7, 0.7)
 
-    assert len(qtable.qtable.cache) == 1
+    assert len(qtable.qtable.cache) == 4
 
     expected_qvalues = {1: init, 2: init, 5: 0.7, 6: 0.8}
 
