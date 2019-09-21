@@ -71,15 +71,20 @@ def is_empty(values):
 
 
 class Board:
-    def __init__(self, board=None):
+    def __init__(self, board=None, illegal_move=None):
         if board is None:
             self.board = np.copy(new_board)
         else:
             self.board = board
 
+        self.illegal_move = illegal_move
+
         self.board_2d = self.board.reshape(BOARD_DIMENSIONS)
 
     def get_game_result(self):
+        if self.illegal_move is not None:
+            return RESULT_O_WINS if self.get_turn() == CELL_X else RESULT_X_WINS
+
         rows_cols_and_diagonals = get_rows_cols_and_diagonals(self.board_2d)
 
         sums = list(map(sum, rows_cols_and_diagonals))
@@ -101,8 +106,11 @@ class Board:
         return self.get_game_result() != RESULT_NOT_OVER
 
     def play_move(self, move_index):
-        assert move_index in self.get_valid_move_indexes(), "move must be valid"
         board_copy = np.copy(self.board)
+
+        if move_index not in self.get_valid_move_indexes():
+            return Board(board_copy, illegal_move=move_index)
+
         board_copy[move_index] = self.get_turn()
         return Board(board_copy)
 
