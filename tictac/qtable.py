@@ -54,6 +54,14 @@ class QTable:
         q_values = self.get_q_values(board)
         return max(q_values.items(), key=operator.itemgetter(1))
 
+    def print_q_values(self):
+        print(f"num q_values = {len(self.qtable.cache)}")
+        for k, v in self.qtable.cache.items():
+            b = np.frombuffer(k, dtype=int)
+            board = Board(b)
+            board.print_board()
+            print(f"qvalue = {v}")
+
 
 def get_initial_q_value(board):
     return (INITIAL_Q_VALUES_FOR_X if board.get_turn() == CELL_O

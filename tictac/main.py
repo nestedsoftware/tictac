@@ -7,7 +7,7 @@ from tictac.qtable import (qtables, play_training_games_x,
 from tictac.mcts import play_mcts_move, perform_training_playouts
 
 # from tictac.mcts import (play_game_and_reset_playouts,
-#                          play_mcts_move_with_live_playouts, nodecache)
+#                          play_mcts_move_with_live_playouts)
 
 play_minimax_move_randomized = create_minimax_player(True)
 play_minimax_move_not_randomized = create_minimax_player(False)

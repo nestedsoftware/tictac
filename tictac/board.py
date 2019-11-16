@@ -105,6 +105,9 @@ class Board:
     def is_gameover(self):
         return self.get_game_result() != RESULT_NOT_OVER
 
+    def is_in_illegal_state(self):
+        return self.illegal_move is not None
+
     def play_move(self, move_index):
         board_copy = np.copy(self.board)
 
