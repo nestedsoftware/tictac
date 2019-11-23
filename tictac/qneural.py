@@ -59,12 +59,14 @@ def create_qneural_player(net_context):
 def play_qneural_move(board, net_context):
     model = net_context.target_net
     q_values = get_q_values(model, board)
-    move_q_value_pairs = list(zip([i for i in range(9)], q_values))
 
     valid_move_indexes = board.get_valid_move_indexes()
-    valid_q_values = [pair for pair in move_q_value_pairs
-                      if pair[0] in valid_move_indexes]
-    move_index, max_q_value = max(valid_q_values, key=lambda pair: pair[1])
+
+    move_q_value_pairs = []
+    for vmi in valid_move_indexes:
+        move_q_value_pairs.append((vmi, q_values[vmi].item()))
+
+    move_index, _ = max(move_q_value_pairs, key=lambda pair: pair[1])
 
     return board.play_move(move_index)
 
@@ -73,6 +75,24 @@ def get_q_values(model, board):
     inputs = convert_to_tensor(board)
     outputs = model(inputs)
     return outputs
+
+
+def convert_cell(v):
+    out = [0, 0, 0]
+    if v == 1:
+        out[0] = 1
+    elif v == -1:
+        out[1] = 1
+    elif v == 0:
+        out[2] = 1
+    else:
+        raise ValueError
+
+    return out
+
+
+def flatmap(func, iterable):
+    return list(itertools.chain.from_iterable(map(func, iterable)))
 
 
 def convert_to_tensor(board):
@@ -93,12 +113,19 @@ def play_training_games_o(net_context, total_games=7000000,
 
 def play_training_games(net_context, qplayer, total_games, discount_factor,
                         epsilon, x_strategies, o_strategies):
+    if x_strategies:
+        x_strategies = itertools.cycle(x_strategies)
+
+    if o_strategies:
+        o_strategies = itertools.cycle(o_strategies)
+
     for game in range(total_games):
         move_history = deque()
-        strategies = get_strategies_to_use(net_context, move_history,
-                                           x_strategies, o_strategies, epsilon)
 
-        x_strategies_to_use, o_strategies_to_use = strategies
+        x_strategies_to_use = get_strategies(x_strategies, net_context,
+                                             move_history, epsilon)
+        o_strategies_to_use = get_strategies(o_strategies, net_context,
+                                             move_history, epsilon)
 
         x_strategy_to_use = next(x_strategies_to_use)
         o_strategy_to_use = next(o_strategies_to_use)
@@ -112,20 +139,12 @@ def play_training_games(net_context, qplayer, total_games, discount_factor,
             print(f"{game+1}/{total_games} games, using epsilon={epsilon}...")
 
 
-def get_strategies_to_use(net_context,  move_history, x_strategies,
-                          o_strategies, epsilon):
-    x_strategies = get_strategies(x_strategies, net_context, move_history,
-                                  epsilon)
-    o_strategies = get_strategies(o_strategies, net_context, move_history,
-                                  epsilon)
-    x_strategies_to_use = itertools.cycle(x_strategies)
-    o_strategies_to_use = itertools.cycle(o_strategies)
-    return x_strategies_to_use, o_strategies_to_use
-
-
 def get_strategies(strategies, net_context, move_history, epsilon):
-    return ([create_training_player(net_context, move_history, epsilon)]
-            if strategies is None else strategies)
+    if strategies:
+        return strategies
+
+    strategies = [create_training_player(net_context, move_history, epsilon)]
+    return itertools.cycle(strategies)
 
 
 def play_training_game(net_context, move_history, q_learning_player,
@@ -145,28 +164,29 @@ def update_training_gameover(net_context, move_history, q_learning_player,
 
     output = net_context.policy_net(convert_to_tensor(next_position))
     target = output.clone().detach()
-    target[move_index] = discount_factor * game_result_reward
+    target[move_index] = game_result_reward
 
-    loss = net_context.loss_function(output, target)
-    net_context.optimizer.zero_grad()
-    loss.backward()
-    net_context.optimizer.step()
+    do_training_step(net_context, output, target)
 
     for (position, move_index) in list(move_history)[1:]:
         next_output = net_context.target_net(convert_to_tensor(next_position))
 
         output = net_context.policy_net(convert_to_tensor(position))
         target = output.clone().detach()
-        target[move_index] = torch.max(next_output).item()
+        target[move_index] = discount_factor * torch.max(next_output).item()
 
-        loss = net_context.loss_function(output, target)
-        net_context.optimizer.zero_grad()
-        loss.backward()
-        net_context.optimizer.step()
+        do_training_step(net_context, output, target)
 
         next_position = position
 
     net_context.target_net.load_state_dict(net_context.policy_net.state_dict())
+
+
+def do_training_step(net_context, output, target):
+    net_context.optimizer.zero_grad()
+    loss = net_context.loss_function(output, target)
+    loss.backward()
+    net_context.optimizer.step()
 
 
 def create_training_player(net_context, move_history, epsilon):

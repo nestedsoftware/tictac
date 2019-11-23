@@ -138,12 +138,19 @@ def play_training_games_o(total_games=7000, q_tables=None,
 
 def play_training_games(total_games, q_tables, q_table_player, learning_rate,
                         discount_factor, epsilon, x_strategies, o_strategies):
+    if x_strategies:
+        x_strategies = itertools.cycle(x_strategies)
+
+    if o_strategies:
+        o_strategies = itertools.cycle(o_strategies)
+
     for game in range(total_games):
         move_history = deque()
-        strategies = get_strategies_to_use(q_tables, move_history,
-                                           x_strategies, o_strategies, epsilon)
 
-        x_strategies_to_use, o_strategies_to_use = strategies
+        x_strategies_to_use = get_strategies(x_strategies, q_tables,
+                                             move_history, epsilon)
+        o_strategies_to_use = get_strategies(o_strategies, q_tables,
+                                             move_history, epsilon)
 
         x_strategy_to_use = next(x_strategies_to_use)
         o_strategy_to_use = next(o_strategies_to_use)
@@ -157,18 +164,12 @@ def play_training_games(total_games, q_tables, q_table_player, learning_rate,
             print(f"{game+1}/{total_games} games, using epsilon={epsilon}...")
 
 
-def get_strategies_to_use(q_tables,  move_history, x_strategies, o_strategies,
-                          epsilon):
-    x_strategies = get_strategies(x_strategies, q_tables, move_history, epsilon)
-    o_strategies = get_strategies(o_strategies, q_tables, move_history, epsilon)
-    x_strategies_to_use = itertools.cycle(x_strategies)
-    o_strategies_to_use = itertools.cycle(o_strategies)
-    return x_strategies_to_use, o_strategies_to_use
-
-
 def get_strategies(strategies, q_tables, move_history, epsilon):
-    return ([create_training_player(q_tables, move_history, epsilon)]
-            if strategies is None else strategies)
+    if strategies:
+        return strategies
+
+    strategies = [create_training_player(q_tables, move_history, epsilon)]
+    return itertools.cycle(strategies)
 
 
 def play_training_game(q_tables, move_history, q_table_player, x_strategy,
