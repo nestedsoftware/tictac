@@ -125,6 +125,10 @@ class Board:
         return ([i for i in range(self.board.size)
                  if self.board[i] == CELL_EMPTY])
 
+    def get_illegal_move_indexes(self):
+        return ([i for i in range(self.board.size)
+                if self.board[i] != CELL_EMPTY])
+
     def get_random_valid_move_index(self):
         return random.choice(self.get_valid_move_indexes())
 

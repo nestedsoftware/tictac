@@ -51,25 +51,34 @@ class NetContext:
 
 def create_qneural_player(net_context):
     def play(board):
-        return play_qneural_move(board, net_context)
+        model = net_context.target_net
+        return play_qneural_move(board, model)
 
     return play
 
 
-def play_qneural_move(board, net_context):
-    model = net_context.target_net
-    q_values = get_q_values(model, board)
-    move_q_value_pairs = list(zip([i for i in range(9)], q_values))
+def play_qneural_move(board, model):
+    max_move_index, _ = select_valid_qneural_move(board, model)
+    return board.play_move(max_move_index)
 
+def select_valid_qneural_move(board, model):
+    q_values = get_q_values(board, model)
     valid_move_indexes = board.get_valid_move_indexes()
-    valid_q_values = [pair for pair in move_q_value_pairs
-                      if pair[0] in valid_move_indexes]
-    move_index, max_q_value = max(valid_q_values, key=lambda pair: pair[1])
+    valid_q_values = get_valid_move_index_q_value_pairs(q_values,
+                                                        valid_move_indexes)
+    max_move_index, q_value = max(valid_q_values, key=lambda pair: pair[1])
 
-    return board.play_move(move_index)
+    return max_move_index, q_value
+
+def get_valid_move_index_q_value_pairs(q_values, valid_move_indexes):
+    valid_q_values = []
+    for vmi in valid_move_indexes:
+        valid_q_values.append((vmi, q_values[vmi].item()))
+
+    return valid_q_values
 
 
-def get_q_values(model, board):
+def get_q_values(board, model):
     inputs = convert_to_tensor(board)
     outputs = model(inputs)
     return outputs
@@ -79,13 +88,13 @@ def convert_to_tensor(board):
     return torch.tensor(board.board, dtype=torch.float)
 
 
-def play_training_games_x(net_context, total_games=7000000,
+def play_training_games_x(net_context, total_games=2000000,
                           discount_factor=1.0, epsilon=0.7, o_strategies=None):
     play_training_games(net_context, CELL_X, total_games, discount_factor,
                         epsilon, None, o_strategies)
 
 
-def play_training_games_o(net_context, total_games=7000000,
+def play_training_games_o(net_context, total_games=2000000,
                           discount_factor=1.0, epsilon=0.7, x_strategies=None):
     play_training_games(net_context, CELL_O, total_games, discount_factor,
                         epsilon, x_strategies, None)
@@ -145,7 +154,11 @@ def update_training_gameover(net_context, move_history, q_learning_player,
 
     output = net_context.policy_net(convert_to_tensor(next_position))
     target = output.clone().detach()
-    target[move_index] = discount_factor * game_result_reward
+    target[move_index] = game_result_reward
+
+    illegal_move_indexes = next_position.get_illegal_move_indexes()
+    for mi in illegal_move_indexes:
+        target[mi] = LOSS_VALUE
 
     loss = net_context.loss_function(output, target)
     net_context.optimizer.zero_grad()
@@ -153,11 +166,15 @@ def update_training_gameover(net_context, move_history, q_learning_player,
     net_context.optimizer.step()
 
     for (position, move_index) in list(move_history)[1:]:
-        next_output = net_context.target_net(convert_to_tensor(next_position))
+        _, qv = select_valid_qneural_move(next_position, net_context.target_net)
 
         output = net_context.policy_net(convert_to_tensor(position))
         target = output.clone().detach()
-        target[move_index] = torch.max(next_output).item()
+        target[move_index] = discount_factor * qv
+
+        illegal_move_indexes = position.get_illegal_move_indexes()
+        for mi in illegal_move_indexes:
+            target[mi] = LOSS_VALUE
 
         loss = net_context.loss_function(output, target)
         net_context.optimizer.zero_grad()
@@ -185,12 +202,15 @@ def choose_move_index(model, board, epsilon):
     if epsilon > 0:
         random_value_from_0_to_1 = np.random.uniform()
         if random_value_from_0_to_1 < epsilon:
-            next_move_index = randrange(9)
-            return next_move_index
+            return board.get_random_valid_move_index()
 
-    q_values = get_q_values(model, board)
-    next_move_index = torch.argmax(q_values).item()
-    return next_move_index
+    q_values = get_q_values(board, model)
+    valid_move_indexes = board.get_valid_move_indexes()
+    valid_q_values = get_valid_move_index_q_value_pairs(q_values,
+                                                        valid_move_indexes)
+    max_move_index, _ = max(valid_q_values, key=lambda pair: pair[1])
+
+    return max_move_index
 
 
 def get_game_result_value(player, board):
