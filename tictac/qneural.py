@@ -21,8 +21,8 @@ OUTPUT_SIZE = 9
 class TicTacNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.dl1 = nn.Linear(INPUT_SIZE, 27)
-        self.dl2 = nn.Linear(27, 27)
+        self.dl1 = nn.Linear(INPUT_SIZE, 36)
+        self.dl2 = nn.Linear(36, 27)
         self.output_layer = nn.Linear(27, OUTPUT_SIZE)
 
     def forward(self, x):
@@ -90,13 +90,13 @@ def convert_to_tensor(board):
     return torch.tensor(board.board, dtype=torch.float)
 
 
-def play_training_games_x(net_context, total_games=8000000,
+def play_training_games_x(net_context, total_games=16000000,
                           discount_factor=1.0, epsilon=0.7, o_strategies=None):
     play_training_games(net_context, CELL_X, total_games, discount_factor,
                         epsilon, None, o_strategies)
 
 
-def play_training_games_o(net_context, total_games=8000000,
+def play_training_games_o(net_context, total_games=16000000,
                           discount_factor=1.0, epsilon=0.7, x_strategies=None):
     play_training_games(net_context, CELL_O, total_games, discount_factor,
                         epsilon, x_strategies, None)
@@ -154,6 +154,7 @@ def update_training_gameover(net_context, move_history, q_learning_player,
     # move history is in reverse-chronological order - last to first
     next_position, move_index = move_history[0]
 
+    net_context.optimizer.zero_grad()
     output = net_context.policy_net(convert_to_tensor(next_position))
     target = output.clone().detach()
     target[move_index] = game_result_reward
@@ -163,15 +164,14 @@ def update_training_gameover(net_context, move_history, q_learning_player,
         target[mi] = LOSS_VALUE
 
     loss = net_context.loss_function(output, target)
-    net_context.optimizer.zero_grad()
     loss.backward()
     net_context.optimizer.step()
 
     for (position, move_index) in list(move_history)[1:]:
         next_q_values = get_q_values(next_position, net_context.target_net)
-        next_q_value_pairs = [(mi, next_q_values[mi].item()) for mi in range(9)]
-        _, qv = max(next_q_value_pairs, key=lambda pair: pair[1])
+        qv = torch.max(next_q_values).item()
 
+        net_context.optimizer.zero_grad()
         output = net_context.policy_net(convert_to_tensor(position))
         target = output.clone().detach()
         target[move_index] = discount_factor * qv
@@ -181,7 +181,6 @@ def update_training_gameover(net_context, move_history, q_learning_player,
             target[mi] = LOSS_VALUE
 
         loss = net_context.loss_function(output, target)
-        net_context.optimizer.zero_grad()
         loss.backward()
         net_context.optimizer.step()
 
@@ -207,14 +206,9 @@ def choose_move_index(board, model, epsilon):
         random_value_from_0_to_1 = np.random.uniform()
         if random_value_from_0_to_1 < epsilon:
             return randrange(9)
-            # return board.get_random_valid_move_index()
 
     q_values = get_q_values(board, model)
-    move_index_q_value_pairs = [(mi, q_values[mi].item()) for mi in range(9)]
-    # valid_move_indexes = board.get_valid_move_indexes()
-    # valid_q_values = get_valid_move_index_q_value_pairs(q_values,
-    #                                                     valid_move_indexes)
-    max_move_index, _ = max(move_index_q_value_pairs, key=lambda pair: pair[1])
+    max_move_index = torch.argmax(q_values).item()
 
     return max_move_index
 
