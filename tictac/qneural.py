@@ -108,12 +108,26 @@ def play_training_games_o(net_context, total_games=900000,
 
 def play_training_games(net_context, qplayer, total_games, discount_factor,
                         epsilon, x_strategies, o_strategies):
+    x_strategies_to_use = None
+    if x_strategies:
+        x_strategies_to_use = itertools.cycle(x_strategies)
+
+
+    o_strategies_to_use = None
+    if o_strategies:
+        o_strategies_to_use = itertools.cycle(o_strategies)
+
     for game in range(total_games):
         move_history = deque()
-        strategies = get_strategies_to_use(net_context, move_history,
-                                           x_strategies, o_strategies, epsilon)
 
-        x_strategies_to_use, o_strategies_to_use = strategies
+        if not x_strategies:
+            x = [create_training_player(net_context, move_history, epsilon)]
+            x_strategies_to_use = itertools.cycle(x)
+
+        if not o_strategies:
+            o = [create_training_player(net_context, move_history, epsilon)]
+            o_strategies_to_use = itertools.cycle(o)
+
 
         x_strategy_to_use = next(x_strategies_to_use)
         o_strategy_to_use = next(o_strategies_to_use)
@@ -125,22 +139,6 @@ def play_training_games(net_context, qplayer, total_games, discount_factor,
         if (game+1) % (total_games / 10) == 0:
             epsilon = max(0, epsilon - 0.1)
             print(f"{game+1}/{total_games} games, using epsilon={epsilon}...")
-
-
-def get_strategies_to_use(net_context,  move_history, x_strategies,
-                          o_strategies, epsilon):
-    x_strategies = get_strategies(x_strategies, net_context, move_history,
-                                  epsilon)
-    o_strategies = get_strategies(o_strategies, net_context, move_history,
-                                  epsilon)
-    x_strategies_to_use = itertools.cycle(x_strategies)
-    o_strategies_to_use = itertools.cycle(o_strategies)
-    return x_strategies_to_use, o_strategies_to_use
-
-
-def get_strategies(strategies, net_context, move_history, epsilon):
-    return ([create_training_player(net_context, move_history, epsilon)]
-            if strategies is None else strategies)
 
 
 def play_training_game(net_context, move_history, q_learning_player,
