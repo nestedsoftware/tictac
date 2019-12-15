@@ -12,7 +12,7 @@ from tictac.board import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS)
 
 WIN_VALUE = 1.0
 DRAW_VALUE = 1.0
-LOSS_VALUE = -1.0
+LOSS_VALUE = 0.0
 
 INPUT_SIZE = 9
 OUTPUT_SIZE = 9
@@ -23,17 +23,21 @@ class TicTacNet(nn.Module):
         super().__init__()
         self.dl1 = nn.Linear(INPUT_SIZE, 36)
         self.dl2 = nn.Linear(36, 27)
+        # self.dl3 = nn.Linear(27, 18)
         self.output_layer = nn.Linear(27, OUTPUT_SIZE)
 
     def forward(self, x):
         x = self.dl1(x)
-        x = torch.tanh(x)
+        x = torch.relu(x)
 
         x = self.dl2(x)
-        x = torch.tanh(x)
+        x = torch.relu(x)
+
+        # x = self.dl3(x)
+        # x = torch.tanh(x)
 
         x = self.output_layer(x)
-        x = torch.tanh(x)
+        x = torch.sigmoid(x)
         return x
 
 
@@ -90,13 +94,13 @@ def convert_to_tensor(board):
     return torch.tensor(board.board, dtype=torch.float)
 
 
-def play_training_games_x(net_context, total_games=16000000,
+def play_training_games_x(net_context, total_games=900000,
                           discount_factor=1.0, epsilon=0.7, o_strategies=None):
     play_training_games(net_context, CELL_X, total_games, discount_factor,
                         epsilon, None, o_strategies)
 
 
-def play_training_games_o(net_context, total_games=16000000,
+def play_training_games_o(net_context, total_games=900000,
                           discount_factor=1.0, epsilon=0.7, x_strategies=None):
     play_training_games(net_context, CELL_O, total_games, discount_factor,
                         epsilon, x_strategies, None)
