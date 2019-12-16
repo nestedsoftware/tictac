@@ -10,7 +10,7 @@ from tictac.board import play_game, play_random_move, is_draw
 from tictac.board import (CELL_X, CELL_O, RESULT_X_WINS, RESULT_O_WINS)
 
 WIN_VALUE = 1.0
-DRAW_VALUE = 1.0
+DRAW_VALUE = 0.9
 LOSS_VALUE = 0.0
 
 INITIAL_Q_VALUES_FOR_X = 0.0
