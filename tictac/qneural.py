@@ -23,7 +23,6 @@ class TicTacNet(nn.Module):
         super().__init__()
         self.dl1 = nn.Linear(INPUT_SIZE, 36)
         self.dl2 = nn.Linear(36, 27)
-        # self.dl3 = nn.Linear(27, 18)
         self.output_layer = nn.Linear(27, OUTPUT_SIZE)
 
     def forward(self, x):
@@ -32,9 +31,6 @@ class TicTacNet(nn.Module):
 
         x = self.dl2(x)
         x = torch.relu(x)
-
-        # x = self.dl3(x)
-        # x = torch.tanh(x)
 
         x = self.output_layer(x)
         x = torch.sigmoid(x)
