@@ -1,6 +1,6 @@
 Demo project for different approaches for playing tic-tac-toe.
 
-Code requires python 3, numpy, and pytest.
+Code requires python 3, numpy, and pytest. For the neural network/dqn implementation (qneural.py), pytorch is required.
 
 Install using pipenv:
 
@@ -91,9 +91,9 @@ Training qtable O vs. random...
 
 Playing qtable vs random:
 -------------------------
-x wins: 95.40%
+x wins: 98.80%
 o wins: 0.00%
-draw  : 4.60%
+draw  : 1.20%
 
 Playing qtable vs minimax random:
 ---------------------------------
@@ -110,8 +110,8 @@ draw  : 100.00%
 Playing random vs qtable:
 -------------------------
 x wins: 0.00%
-o wins: 78.10%
-draw  : 21.90%
+o wins: 92.30%
+draw  : 7.70%
 
 Playing minimax random vs qtable:
 ---------------------------------
