@@ -20,7 +20,7 @@ loss = MSELoss()
 net_context = NetContext(policy_net, target_net, sgd, loss)
 
 with torch.no_grad():
-    board = Board(np.array([1, -1, 0, 0, 1, 1, 0, 0, -1]))
+    board = Board(np.array([1, -1, -1, 0, 1, 1, 0, 0, -1]))
     q_values = get_q_values(board, net_context.target_net)
     print(f"Before training q_values = {q_values}")
 
@@ -67,6 +67,6 @@ with torch.no_grad():
     play_games(1000, play_qneural_move, play_qneural_move)
     print("")
 
-    board = Board(np.array([1, -1, 0, 0, 1, 1, 0, 0, -1]))
+    board = Board(np.array([1, -1, -1, 0, 1, 1, 0, 0, -1]))
     q_values = get_q_values(board, net_context.target_net)
     print(f"After training q_values = {q_values}")
