@@ -21,9 +21,9 @@ OUTPUT_SIZE = 9
 class TicTacNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.dl1 = nn.Linear(INPUT_SIZE, 27)
-        self.dl2 = nn.Linear(27, 27)
-        self.output_layer = nn.Linear(27, OUTPUT_SIZE)
+        self.dl1 = nn.Linear(INPUT_SIZE, 36)
+        self.dl2 = nn.Linear(36, 36)
+        self.output_layer = nn.Linear(36, OUTPUT_SIZE)
 
     def forward(self, x):
         x = self.dl1(x)
@@ -90,13 +90,13 @@ def convert_to_tensor(board):
     return torch.tensor(board.board, dtype=torch.float)
 
 
-def play_training_games_x(net_context, total_games=1000000,
+def play_training_games_x(net_context, total_games=2000000,
                           discount_factor=1.0, epsilon=0.7, o_strategies=None):
     play_training_games(net_context, CELL_X, total_games, discount_factor,
                         epsilon, None, o_strategies)
 
 
-def play_training_games_o(net_context, total_games=1000000,
+def play_training_games_o(net_context, total_games=2000000,
                           discount_factor=1.0, epsilon=0.7, x_strategies=None):
     play_training_games(net_context, CELL_O, total_games, discount_factor,
                         epsilon, x_strategies, None)
