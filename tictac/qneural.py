@@ -152,39 +152,32 @@ def update_training_gameover(net_context, move_history, q_learning_player,
     # move history is in reverse-chronological order - last to first
     next_position, move_index = move_history[0]
 
-    net_context.optimizer.zero_grad()
-    output = net_context.policy_net(convert_to_tensor(next_position))
-    target = output.clone().detach()
-    target[move_index] = game_result_reward
+    backpropagate(net_context, next_position, move_index, game_result_reward)
 
-    illegal_move_indexes = next_position.get_illegal_move_indexes()
+    for (position, move_index) in list(move_history)[1:]:
+        next_q_values = get_q_values(next_position, net_context.target_net)
+        qv = torch.max(next_q_values).item()
+
+        backpropagate(net_context, position, move_index, discount_factor * qv)
+
+        next_position = position
+
+    net_context.target_net.load_state_dict(net_context.policy_net.state_dict())
+
+
+def backpropagate(net_context, position, move_index, target_value):
+    net_context.optimizer.zero_grad()
+    output = net_context.policy_net(convert_to_tensor(position))
+
+    target = output.clone().detach()
+    target[move_index] = target_value
+    illegal_move_indexes = position.get_illegal_move_indexes()
     for mi in illegal_move_indexes:
         target[mi] = LOSS_VALUE
 
     loss = net_context.loss_function(output, target)
     loss.backward()
     net_context.optimizer.step()
-
-    for (position, move_index) in list(move_history)[1:]:
-        next_q_values = get_q_values(next_position, net_context.target_net)
-        qv = torch.max(next_q_values).item()
-
-        net_context.optimizer.zero_grad()
-        output = net_context.policy_net(convert_to_tensor(position))
-        target = output.clone().detach()
-        target[move_index] = discount_factor * qv
-
-        illegal_move_indexes = position.get_illegal_move_indexes()
-        for mi in illegal_move_indexes:
-            target[mi] = LOSS_VALUE
-
-        loss = net_context.loss_function(output, target)
-        loss.backward()
-        net_context.optimizer.step()
-
-        next_position = position
-
-    net_context.target_net.load_state_dict(net_context.policy_net.state_dict())
 
 
 def create_training_player(net_context, move_history, epsilon):
