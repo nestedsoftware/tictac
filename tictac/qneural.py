@@ -104,12 +104,9 @@ def play_training_games_o(net_context, total_games=2000000,
 
 def play_training_games(net_context, qplayer, total_games, discount_factor,
                         epsilon, x_strategies, o_strategies):
-    x_strategies_to_use = None
     if x_strategies:
         x_strategies_to_use = itertools.cycle(x_strategies)
 
-
-    o_strategies_to_use = None
     if o_strategies:
         o_strategies_to_use = itertools.cycle(o_strategies)
 
@@ -155,8 +152,9 @@ def update_training_gameover(net_context, move_history, q_learning_player,
     backpropagate(net_context, next_position, move_index, game_result_reward)
 
     for (position, move_index) in list(move_history)[1:]:
-        next_q_values = get_q_values(next_position, net_context.target_net)
-        qv = torch.max(next_q_values).item()
+        with torch.no_grad():
+            next_q_values = get_q_values(next_position, net_context.target_net)
+            qv = torch.max(next_q_values).item()
 
         backpropagate(net_context, position, move_index, discount_factor * qv)
 
@@ -198,8 +196,9 @@ def choose_move_index(board, model, epsilon):
         if random_value_from_0_to_1 < epsilon:
             return randrange(9)
 
-    q_values = get_q_values(board, model)
-    max_move_index = torch.argmax(q_values).item()
+    with torch.no_grad():
+        q_values = get_q_values(board, model)
+        max_move_index = torch.argmax(q_values).item()
 
     return max_move_index
 
