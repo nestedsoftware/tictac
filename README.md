@@ -18,8 +18,6 @@ Run tests and demo:
 * Run demo: `python -m tictac.main`
 * Run neural net demo: `python -m tictac.main_qneural`
 
-Below are the most recent demo results. The current qtable agent plays near-perfect games as O against itself, minimax, and random. Getting good result for the X player was pretty straightforward, but for O it took quite a bit of fiddling with the hyperparameters.
-
 Latest results:
 
 ```
