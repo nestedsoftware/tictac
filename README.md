@@ -5,7 +5,7 @@ Code requires python 3, numpy, and pytest. For the neural network/dqn implementa
 Install using pipenv:
 
 * `pipenv shell`
-* `pipenv install --dev`
+* `pipenv --site-packages install --dev`
 
 Make sure to set `PYTHONPATH` to main project directory:
 
