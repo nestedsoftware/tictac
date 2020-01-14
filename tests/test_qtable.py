@@ -286,7 +286,7 @@ def test_play_training_game_o_player():
     second_board[2] = CELL_O
     second_board[4] = CELL_X
 
-    val = 0.9 * -1
+    val = 0.9 * 0
     expected_move_indexes_and_q_values = {1: val,
                                           3: init, 5: init,
                                           6: init, 7: init, 8: init}
