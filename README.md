@@ -2,12 +2,16 @@ Demo project for different approaches for playing tic-tac-toe.
 
 Code requires python 3, numpy, and pytest. For the neural network/dqn implementation (qneural.py), pytorch is required.
 
+Create virtual environment using pipenv:
+
+* `pipenv --site-packages`
+
 Install using pipenv:
 
 * `pipenv shell`
-* `pipenv --site-packages install --dev`
+* `pipenv install --dev`
 
-Make sure to set `PYTHONPATH` to main project directory:
+Set `PYTHONPATH` to main project directory:
 
 * In windows, run `path.bat`
 * In bash run `source path.sh`
