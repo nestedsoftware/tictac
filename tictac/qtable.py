@@ -138,11 +138,9 @@ def play_training_games_o(total_games=7000, q_tables=None,
 
 def play_training_games(total_games, q_tables, q_table_player, learning_rate,
                         discount_factor, epsilon, x_strategies, o_strategies):
-    x_strategies_to_use = None
     if x_strategies:
         x_strategies_to_use = itertools.cycle(x_strategies)
 
-    o_strategies_to_use = None
     if o_strategies:
         o_strategies_to_use = itertools.cycle(o_strategies)
 
