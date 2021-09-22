@@ -1,11 +1,8 @@
-import numpy as np
+from numpy import array
 
-from tictac.board import Board
+from src.board import Board
 
 
 def test_get_random_valid_move():
-    b = np.array([0, -1, 0, 0, -1, 0, 1, 0, 1])
-
-    move = Board(b).get_random_valid_move_index()
-
-    assert move in [0, 2, 3, 5, 7]
+    b = array([0, -1, 0, 0, -1, 0, 1, 0, 1])
+    assert Board(b).get_random_valid_move_index() in [0, 2, 3, 5, 7]

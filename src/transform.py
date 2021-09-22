@@ -1,4 +1,7 @@
-import numpy as np
+''' Matrix transformations '''
+
+
+from numpy import rot90
 
 
 class Transform:
@@ -29,7 +32,7 @@ class Identity:
 class Rotate90:
     def __init__(self, number_of_rotations):
         self.number_of_rotations = number_of_rotations
-        self.op = np.rot90
+        self.op = rot90
 
     def transform(self, matrix2d):
         return self.op(matrix2d, self.number_of_rotations)
