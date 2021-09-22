@@ -9,10 +9,14 @@ from numpy import flipud, fliplr, array, copy, count_nonzero, rot90
 from transform import Transform, Identity, Rotate90, Flip
 
 
-TRANSFORMATIONS = [Identity(), Rotate90(1), Rotate90(2), Rotate90(3),
-                   Flip(flipud), Flip(fliplr),
-                   Transform(Rotate90(1), Flip(flipud)),
-                   Transform(Rotate90(1), Flip(fliplr))]
+TRANSFORMATIONS = [lambda matrix: matrix,
+                   lambda matrix: rot90(matrix, k=1),
+                   lambda matrix: rot90(matrix, k=2),
+                   lambda matrix: rot90(matrix, k=3),
+                   lambda matrix: flipud(matrix),
+                   lambda matrix: fliplr(matrix),
+                   lambda matrix: flipud(np.rot90(matrix, k=1)),
+                   lambda matrix: fliplr(np.rot90(matrix, k=1))]
 
 BOARD_SIZE = 3
 BOARD_DIMENSIONS = (BOARD_SIZE, BOARD_SIZE)
@@ -160,7 +164,7 @@ class BoardCache:
 
 
 def get_symmetrical_board_orientations(board_2d):
-    return [(t.transform(board_2d), t) for t in TRANSFORMATIONS]
+    return [(transform(board_2d), transform) for transform in TRANSFORMATIONS]
 
 def get_rows_cols_and_diagonals(board_2d):
     rows_and_diagonal = get_rows_and_diagonal(board_2d)
